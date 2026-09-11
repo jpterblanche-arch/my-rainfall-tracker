@@ -33,3 +33,9 @@
     font-size:16px;
   }
 }
+.sync-status{
+  display:inline-block;
+  margin-top:4px;
+  font-size:12px;
+  color:#667085;
+}
