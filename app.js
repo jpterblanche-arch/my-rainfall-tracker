@@ -5,7 +5,10 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let page = 'dashboard', editing = null, session = null;
 const pages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['import','Import / Export'],['settings','Settings']];
-const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1)} mm`;
+const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1)} mm`;function syncStatus(text){
+  const el=$('#sync-status');
+  if(el)el.textContent=text;
+}
 const read = () => JSON.parse(localStorage.getItem(KEY) || '[]').sort((a,b)=>b.date.localeCompare(a.date));
 async function loadFromSupabase(){
   const {data,error} = await db.from('rainfall').select('*').order('date',{ascending:false});
@@ -40,7 +43,7 @@ async function save(rows){
   const old = read();
   localStorage.setItem(KEY, JSON.stringify(rows));
 
-  if(!session) return;
+  if(!session) return;syncStatus('☁️ Saving…');
 
   const oldByDate = new Map(old.map(r => [r.date,r]));
   const newByDate = new Map(rows.map(r => [r.date,r]));
@@ -83,6 +86,7 @@ async function save(rows){
   }
 
   localStorage.setItem(KEY, JSON.stringify(rows));
+  syncStatus('☁️ Synced');
 }function showLogin(errorText=''){
   $('#nav').innerHTML='';
   $('#page-title').textContent='Sign in';
