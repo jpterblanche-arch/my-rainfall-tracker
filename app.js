@@ -147,7 +147,7 @@ const monthName = i => new Date(2000,i,1).toLocaleString(undefined,{month:'short
 const esc = s => String(s||'').replace(/[&<>"']/g, x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)[1]; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
 function go(p){page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
-function sum(rows){return rows.reduce((n,r)=>n+Number(r.rainfall_mm),0)}
+function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
 function chart(values, labels){const max=Math.max(...values,1);return `<div class="chart">${values.map((v,i)=>`<div class="bar" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`}
 function empty(t='No rainfall records yet. Record rainfall or import a CSV file to begin.'){return `<div class="empty">${t}</div>`}
