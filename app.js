@@ -11,7 +11,7 @@ const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1
 }
 const read = () => JSON.parse(localStorage.getItem(KEY) || '[]').sort((a,b)=>b.date.localeCompare(a.date));
 async function loadFromSupabase(){
-  const {data,error} = await db.from('rainfall').select('*').order('date',{ascending:false}).range(0,4999);
+  const {data,error} = await db.from('rainfall').select('*').order('date',{ascending:false});
   if(error) throw error;
 
   const local = read();
