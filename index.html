@@ -9,7 +9,11 @@
   <body>
     <div class="app-shell">
       <aside><a class="brand" href="#dashboard">☔ <span>My Rainfall<br><b>Tracker</b></span></a><nav id="nav"></nav><div class="home">Tracking rainfall at<br><strong>My Home</strong></div></aside>
-      <main><header><button id="menu" aria-label="Open menu">☰</button><div><p class="eyebrow">HOME RAINFALL</p><h1 id="page-title">Dashboard</h1></div><button class="primary quick" data-page="record">+ Record rainfall</button></header><section id="content"></section></main>
+      <main><header><button id="menu" aria-label="Open menu">☰</button><div>
+  <p class="eyebrow">HOME RAINFALL</p>
+  <h1 id="page-title">Dashboard</h1>
+  <span id="sync-status" class="sync-status">☁️ Synced</span>
+</div><button class="primary quick" data-page="record">+ Record rainfall</button></header><section id="content"></section></main>
     </div>
     <input id="csv-file" type="file" accept=".csv,text/csv" hidden />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
