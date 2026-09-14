@@ -221,6 +221,11 @@ const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
   <div class="metric">${money(currentYTD)}</div>
   <div class="sub">1 Jan to today</div>
 </div>
+<div class="card">
+  <label>HISTORICAL AVERAGE TO DATE</label>
+  <div class="metric">${money(historicalAverageYTD)}</div>
+  <div class="sub">2011–2025, same date</div>
+</div>
     <div class="card">
       <label>TOTAL RAINFALL</label>
       <div class="metric">${money(total)}</div>
