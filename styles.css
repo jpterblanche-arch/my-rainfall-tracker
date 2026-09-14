@@ -39,3 +39,6 @@
   font-size:12px;
   color:#667085;
 }
+#content > .grid:first-child{
+  grid-template-columns:1fr 1fr;
+}
