@@ -185,11 +185,11 @@ function insights(){
   }));
 
   const total=sum(rows);
-  const averageAnnual=annual.length?total/annual.length:0;
+const completeYears=annual.filter(x=>x.year!=='2010' && x.year!=='2026');
+const averageAnnual=completeYears.length?completeYears.reduce((n,x)=>n+x.total,0)/completeYears.length:0;
 
-  const wettest=annual.reduce((a,b)=>b.total>a.total?b:a);
-  const completeYears=annual.filter(x=>x.year!=='2010' && x.year!=='2026');
-  const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
+const wettest=annual.reduce((a,b)=>b.total>a.total?b:a);
+const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
 
   const highest=Math.max(...rows.map(r=>Number(r.rainfall_mm)));
   const rainyDays=rainy(rows).length;
