@@ -186,6 +186,19 @@ function insights(){
   .reduce((n,r)=>n+Number(r.rainfall_mm),0);
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
+  const historicalYTD=years
+  .filter(y=>y!=='2010' && y!==currentYear)
+  .map(y=>rows
+    .filter(r=>{
+      const d=r.date;
+      return d.startsWith(y+'-') && d.slice(5,10)<=`${String(currentMonth).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
+    })
+    .reduce((n,r)=>n+Number(r.rainfall_mm),0)
+  );
+
+const historicalAverageYTD=historicalYTD.length
+  ? historicalYTD.reduce((n,v)=>n+v,0)/historicalYTD.length
+  : 0;
 
   const annual=years.map(y=>({
     year:y,
