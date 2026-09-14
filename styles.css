@@ -42,3 +42,6 @@
 #content > .grid:first-child{
   grid-template-columns:1fr 1fr;
 }
+.insights-grid{
+  grid-template-columns:1fr 1fr;
+}
