@@ -173,6 +173,69 @@ function yearly(){const rows=read(), years=[...new Set(rows.map(r=>r.date.slice(
 function compare(){const years=[...new Set(read().map(r=>r.date.slice(0,4)))].sort().reverse();if(years.length<2)return empty('At least two years of rainfall data are needed for a comparison.');return `<div class="panel"><div class="toolbar"><h2>Compare years</h2><div><select id="year-a">${years.map(y=>`<option>${y}</option>`)}</select> <select id="year-b">${years.map((y,i)=>`<option ${i===1?'selected':''}>${y}</option>`)}</select></div></div><div id="comparison"></div></div>`}
 function drawCompare(){const a=$('#year-a').value,b=$('#year-b').value,rows=read(),ar=rows.filter(r=>r.date.startsWith(a+'-')),br=rows.filter(r=>r.date.startsWith(b+'-')),av=byMonth(rows,a).map(sum),bv=byMonth(rows,b).map(sum),at=sum(ar),bt=sum(br),diff=at-bt,pct=bt?diff/bt*100:null;$('#comparison').innerHTML=`<div class="cards"><div class="card"><label>${a} TOTAL</label><div class="metric">${money(at)}</div></div><div class="card"><label>${b} TOTAL</label><div class="metric">${money(bt)}</div></div><div class="card"><label>DIFFERENCE</label><div class="metric">${money(diff)}</div><div class="sub">${pct===null?'Percentage unavailable (comparison is zero)':pct.toFixed(1)+'%'}</div></div><div class="card"><label>RAINY DAYS</label><div class="metric">${rainy(ar).length} / ${rainy(br).length}</div><div class="sub">${a} / ${b}</div></div></div><div class="grid"><div class="panel"><h2>Monthly comparison</h2>${chart(av.map((x,i)=>Math.max(x,bv[i])),Array.from({length:12},(_,i)=>monthName(i)))}</div><div class="panel"><h2>Key comparison</h2><div class="list"><div class="list-row"><span>Wettest month</span><b>${monthName(av.indexOf(Math.max(...av)))} / ${monthName(bv.indexOf(Math.max(...bv)))}</b></div><div class="list-row"><span>Max daily rainfall</span><b>${money(Math.max(0,...ar.map(r=>r.rainfall_mm)))} / ${money(Math.max(0,...br.map(r=>r.rainfall_mm)))}</b></div></div></div></div><div class="sub">The chart shows the higher of each pair of monthly totals. Detailed values appear below.</div><div class="wide"><table class="stat-table"><thead><tr><th>Month</th><th>${a}</th><th>${b}</th><th>Difference</th></tr></thead><tbody>${av.map((x,i)=>`<tr><td>${monthName(i)}</td><td>${money(x)}</td><td>${money(bv[i])}</td><td>${money(x-bv[i])}</td></tr>`).join('')}</tbody></table></div>`}
 function importer(){return `<div class="two"><div class="panel"><h2>Import rainfall data</h2><p class="sub">CSV headings: <code>date,rainfall_mm,notes</code></p><p class="sub">Duplicates, invalid dates, negative values, and invalid rainfall values are rejected.</p><div class="actions"><button class="primary" id="choose-file">Choose CSV file</button><button class="secondary" id="load-included">Load included rainfall history</button></div><div id="import-message" style="margin-top:14px"></div></div><div class="panel"><h2>Export data</h2><p class="sub">Download all stored rainfall records in a compatible CSV format.</p><button class="secondary" id="export-all">Export all records</button></div></div>`}
+function insights(){
+  const rows=read();
+  if(!rows.length)return empty();
+
+  const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
+
+  const annual=years.map(y=>({
+    year:y,
+    total:sum(rows.filter(r=>r.date.startsWith(y+'-')))
+  }));
+
+  const total=sum(rows);
+  const averageAnnual=annual.length?total/annual.length:0;
+
+  const wettest=annual.reduce((a,b)=>b.total>a.total?b:a);
+  const driest=annual.reduce((a,b)=>b.total<a.total?b:a);
+
+  const highest=Math.max(...rows.map(r=>Number(r.rainfall_mm)));
+  const rainyDays=rainy(rows).length;
+
+  return `<div class="grid">
+    <div class="card">
+      <label>TOTAL RAINFALL</label>
+      <div class="metric">${money(total)}</div>
+      <div class="sub">${rows.length} records</div>
+    </div>
+
+    <div class="card">
+      <label>AVERAGE ANNUAL</label>
+      <div class="metric">${money(averageAnnual)}</div>
+      <div class="sub">${years.length} years</div>
+    </div>
+
+    <div class="card">
+      <label>WETTEST YEAR</label>
+      <div class="metric">${wettest.year}</div>
+      <div class="sub">${money(wettest.total)}</div>
+    </div>
+
+    <div class="card">
+      <label>DRIEST YEAR</label>
+      <div class="metric">${driest.year}</div>
+      <div class="sub">${money(driest.total)}</div>
+    </div>
+
+    <div class="card">
+      <label>HIGHEST DAILY RAINFALL</label>
+      <div class="metric">${money(highest)}</div>
+      <div class="sub">Single day</div>
+    </div>
+
+    <div class="card">
+      <label>RAINY DAYS</label>
+      <div class="metric">${rainyDays}</div>
+      <div class="sub">0.1 mm or more</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Annual rainfall</h2>
+    ${chart(annual.map(x=>x.total),annual.map(x=>x.year))}
+  </div>`;
+}
 function settings(){return `<div class="panel">
     <h2>Settings</h2>
     <p class="sub">Rainy day threshold: <b>0.1 mm</b>. Rainfall intensity bands are ready for future use: 0, 0.1–5, 5–20, 20–50, and 50+ mm.</p>
@@ -200,7 +263,7 @@ if(page==='settings'){
   };
 }}
 function message(t,bad=false){const old=$('#record-form')?.previousElementSibling;if(old?.classList.contains('notice')||old?.classList.contains('error'))old.remove();$('#record-form')?.insertAdjacentHTML('beforebegin',`<div class="${bad?'error':'notice'}">${t}</div>`)}
-function render(){const views={dashboard,record,history,monthly,yearly,compare,import:importer,settings};$('#content').innerHTML=views[page]();bind()}
+function render(){const views={dashboard,record,history,monthly,yearly,compare,insights,import:importer,settings};$('#content').innerHTML=views[page]();bind()}
 function parseCsvLine(line){const fields=[];let value='',quoted=false;for(let i=0;i<line.length;i++){const character=line[i];if(character==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++}else quoted=!quoted}else if(character===','&&!quoted){fields.push(value);value=''}else value+=character}if(quoted)return {error:'unclosed quoted field'};fields.push(value);return {fields}}
 function parseImport(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter((line,index)=>index===0||line.trim()!==''), rejected=[], parsed=[], existing=new Set(read().map(record=>record.date));const header=parseCsvLine(lines.shift()||'');if(header.error||header.fields.map(value=>value.trim().toLowerCase()).join(',')!=='date,rainfall_mm,notes')return {parsed,rejected:['Header must be exactly: date,rainfall_mm,notes']};for(let index=0;index<lines.length;index++){const row=parseCsvLine(lines[index]), rowNumber=index+2;if(row.error){rejected.push(`Row ${rowNumber}: ${row.error}`);continue}let fields=row.fields;if(fields.length===4&&fields[3]===''&&/^\d+$/.test(fields[1].trim())&&/^\d+$/.test(fields[2].trim()))fields=[fields[0],fields[1]+'.'+fields[2],''];const [date,rawRainfall,notes,...extra]=fields;if(extra.length||fields.length!==3){rejected.push(`Row ${rowNumber}: expected date,rainfall_mm,notes (or date,whole,decimal,)`);continue}if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){rejected.push(`Row ${rowNumber}: date must use YYYY-MM-DD`);continue}const dateValue=new Date(`${date}T00:00:00Z`);if(Number.isNaN(dateValue.getTime())||dateValue.toISOString().slice(0,10)!==date){rejected.push(`Row ${rowNumber}: invalid calendar date`);continue}const rainfall=Number(rawRainfall);if(rawRainfall.trim()===''||!Number.isFinite(rainfall)){rejected.push(`Row ${rowNumber}: rainfall_mm must be a number`);continue}if(rainfall<0){rejected.push(`Row ${rowNumber}: rainfall_mm cannot be negative`);continue}if(existing.has(date)){rejected.push(`Row ${rowNumber}: a record already exists for ${date}`);continue}parsed.push({date,rainfall_mm:rainfall,notes:notes||''});existing.add(date)}return {parsed,rejected}}
 async function completeImport(text){
