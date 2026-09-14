@@ -271,7 +271,7 @@ const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
     </div>
   </div>
 
-  <div class="panel">
+ <div class="panel" style="grid-column:1 / -1;">
     <h2>Annual rainfall</h2>
     ${chart(annual.map(x=>x.total),annual.map(x=>x.year))}
   </div>`;
