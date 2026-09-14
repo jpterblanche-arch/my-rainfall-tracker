@@ -177,6 +177,11 @@ function insights(){
   const rows=read();
   if(!rows.length)return empty();
 
+  const today=new Date();
+  const currentYear=String(today.getFullYear());
+  const currentMonth=today.getMonth()+1;
+  const currentDay=today.getDate();
+
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
 
   const annual=years.map(y=>({
