@@ -221,7 +221,6 @@ const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
 
  return `<div class="grid insights-grid">
   <div class="card">
- <div class="card">
   <label>2026 RAINFALL TO DATE</label>
   <div class="metric">${money(currentYTD)}</div>
   <div class="sub">1 Jan to today</div>
