@@ -188,7 +188,7 @@ function insights(){
   const averageAnnual=annual.length?total/annual.length:0;
 
   const wettest=annual.reduce((a,b)=>b.total>a.total?b:a);
-  const completeYears=annual.filter(x=>x.year!=='2010');
+  const completeYears=annual.filter(x=>x.year!=='2010' && x.year!=='2026');
   const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
 
   const highest=Math.max(...rows.map(r=>Number(r.rainfall_mm)));
