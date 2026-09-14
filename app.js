@@ -219,7 +219,7 @@ const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
   const highest=Math.max(...rows.map(r=>Number(r.rainfall_mm)));
   const rainyDays=rainy(rows).length;
 
-  return `<div class="grid">
+ return `<div class="grid insights-grid">
   <div class="card">
  <div class="card">
   <label>2026 RAINFALL TO DATE</label>
