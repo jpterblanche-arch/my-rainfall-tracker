@@ -4,7 +4,7 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_taDB6yP24Hfv3yak3dzvDw_4npv4umc
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let page = 'dashboard', editing = null, session = null;
-const pages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['import','Import / Export'],['settings','Settings']];
+const pages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1)} mm`;function syncStatus(text){
   const el=$('#sync-status');
   if(el)el.textContent=text;
