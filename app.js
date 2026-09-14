@@ -199,6 +199,10 @@ function insights(){
 const historicalAverageYTD=historicalYTD.length
   ? historicalYTD.reduce((n,v)=>n+v,0)/historicalYTD.length
   : 0;
+  const ytdDifference=currentYTD-historicalAverageYTD;
+const ytdPercentage=historicalAverageYTD
+  ? (ytdDifference/historicalAverageYTD)*100
+  : 0;
 
   const annual=years.map(y=>({
     year:y,
