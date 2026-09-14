@@ -181,6 +181,9 @@ function insights(){
   const currentYear=String(today.getFullYear());
   const currentMonth=today.getMonth()+1;
   const currentDay=today.getDate();
+  const currentYTD=rows
+  .filter(r=>r.date.startsWith(currentYear+'-'))
+  .reduce((n,r)=>n+Number(r.rainfall_mm),0);
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
 
