@@ -284,10 +284,45 @@ const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
   </div>
 
  <div class="panel" style="grid-column:1 / -1;">
-  <h2>2026 rainfall vs historical average</h2>
+  <div class="panel" style="grid-column:1 / -1;">
+  <h2>2026 rainfall performance</h2>
+
   <div class="list">
     <div class="list-row">
-      <span>2026 rainfall to date</span>
+      <span><b>2026 to date</b></span>
+      <b>${money(currentYTD)}</b>
+    </div>
+
+    <div class="list-row">
+      <span>Historical average to same date</span>
+      <b>${money(historicalAverageYTD)}</b>
+    </div>
+
+    <div class="list-row">
+      <span>Difference</span>
+      <b>${money(ytdDifference)} (${ytdPercentage.toFixed(1)}%)</b>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid #dfe5ec;margin:14px 0;"></div>
+
+  <div class="list">
+    <div class="list-row">
+      <span><b>2026 to date</b></span>
+      <b>${money(currentYTD)}</b>
+    </div>
+
+    <div class="list-row">
+      <span>${previousYear} to same date</span>
+      <b>${money(previousYearYTD)}</b>
+    </div>
+
+    <div class="list-row">
+      <span>Difference</span>
+      <b>${money(previousYearDifference)} (${previousYearPercentage===null?'—':previousYearPercentage.toFixed(1)+'%'})</b>
+    </div>
+  </div>
+</div>
       <b>${money(currentYTD)}</b>
     </div>
     <div class="list-row">
