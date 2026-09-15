@@ -181,17 +181,20 @@ function insights(){
   const currentYear=String(today.getFullYear());
   const currentMonth=today.getMonth()+1;
   const currentDay=today.getDate();
+
   const currentYTD=rows
-  .filter(r=>r.date.startsWith(currentYear+'-'))
-  .reduce((n,r)=>n+Number(r.rainfall_mm),0);
+    .filter(r=>r.date.startsWith(currentYear+'-'))
+    .reduce((n,r)=>n+Number(r.rainfall_mm),0);
+
   const previousYear=String(Number(currentYear)-1);
+
   const previousYearYTD=rows
-  .filter(r=>{
-    const d=r.date;
-    return d.startsWith(previousYear+'-') &&
-           d.slice(5,10)<=`${String(currentMonth).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
-  })
-  .reduce((n,r)=>n+Number(r.rainfall_mm),0);
+    .filter(r=>{
+      const d=r.date;
+      return d.startsWith(previousYear+'-') &&
+        d.slice(5,10)<=`${String(currentMonth).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
+    })
+    .reduce((n,r)=>n+Number(r.rainfall_mm),0);
 
   const previousYearDifference=currentYTD-previousYearYTD;
   const previousYearPercentage=previousYearYTD
@@ -199,23 +202,27 @@ function insights(){
     : null;
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
-  const historicalYTD=years
-  .filter(y=>y!=='2010' && y!==currentYear)
-  .map(y=>rows
-    .filter(r=>{
-      const d=r.date;
-      return d.startsWith(y+'-') && d.slice(5,10)<=`${String(currentMonth).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
-    })
-    .reduce((n,r)=>n+Number(r.rainfall_mm),0)
-  );
 
-const historicalAverageYTD=historicalYTD.length
-  ? historicalYTD.reduce((n,v)=>n+v,0)/historicalYTD.length
-  : 0;
+  const historicalYTD=years
+    .filter(y=>y!=='2010' && y!==currentYear)
+    .map(y=>rows
+      .filter(r=>{
+        const d=r.date;
+        return d.startsWith(y+'-') &&
+          d.slice(5,10)<=`${String(currentMonth).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
+      })
+      .reduce((n,r)=>n+Number(r.rainfall_mm),0)
+    );
+
+  const historicalAverageYTD=historicalYTD.length
+    ? historicalYTD.reduce((n,v)=>n+v,0)/historicalYTD.length
+    : 0;
+
   const ytdDifference=currentYTD-historicalAverageYTD;
-const ytdPercentage=historicalAverageYTD
-  ? (ytdDifference/historicalAverageYTD)*100
-  : 0;
+
+  const ytdPercentage=historicalAverageYTD
+    ? (ytdDifference/historicalAverageYTD)*100
+    : 0;
 
   const annual=years.map(y=>({
     year:y,
@@ -223,111 +230,114 @@ const ytdPercentage=historicalAverageYTD
   }));
 
   const total=sum(rows);
-const completeYears=annual.filter(x=>x.year!=='2010' && x.year!=='2026');
-const averageAnnual=completeYears.length?completeYears.reduce((n,x)=>n+x.total,0)/completeYears.length:0;
 
-const wettest=annual.reduce((a,b)=>b.total>a.total?b:a);
-const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
+  const completeYears=annual.filter(
+    x=>x.year!=='2010' && x.year!==currentYear
+  );
 
-  const highest=Math.max(...rows.map(r=>Number(r.rainfall_mm)));
+  const averageAnnual=completeYears.length
+    ? completeYears.reduce((n,x)=>n+x.total,0)/completeYears.length
+    : 0;
+
+  const wettest=annual.reduce(
+    (a,b)=>b.total>a.total?b:a
+  );
+
+  const driest=completeYears.reduce(
+    (a,b)=>b.total<a.total?b:a
+  );
+
+  const highest=Math.max(
+    ...rows.map(r=>Number(r.rainfall_mm))
+  );
+
   const rainyDays=rainy(rows).length;
 
- return `<div class="grid insights-grid">
- 
-    <div class="card">
-      <label>TOTAL RAINFALL</label>
-      <div class="metric">${money(total)}</div>
-      <div class="sub">${rows.length} records</div>
-    </div>
+  return `
+    <div class="grid insights-grid">
 
-    <div class="card">
-      <label>AVERAGE ANNUAL</label>
-      <div class="metric">${money(averageAnnual)}</div>
-      <div class="sub">${years.length} years</div>
-    </div>
+      <div class="panel" style="grid-column:1 / -1;">
+        <h2>2026 rainfall performance</h2>
 
-    <div class="card">
-      <label>WETTEST YEAR</label>
-      <div class="metric">${wettest.year}</div>
-      <div class="sub">${money(wettest.total)}</div>
-    </div>
+        <div class="list">
+          <div class="list-row">
+            <span><b>2026 to date</b></span>
+            <b>${money(currentYTD)}</b>
+          </div>
 
-    <div class="card">
-      <label>DRIEST YEAR</label>
-      <div class="metric">${driest.year}</div>
-      <div class="sub">${money(driest.total)}</div>
-    </div>
+          <div class="list-row">
+            <span>Historical average to same date</span>
+            <b>${money(historicalAverageYTD)}</b>
+          </div>
 
-    <div class="card">
-      <label>HIGHEST DAILY RAINFALL</label>
-      <div class="metric">${money(highest)}</div>
-      <div class="sub">Single day</div>
-    </div>
+          <div class="list-row">
+            <span>Difference</span>
+            <b>${money(ytdDifference)} (${ytdPercentage.toFixed(1)}%)</b>
+          </div>
+        </div>
 
-    <div class="card">
-      <label>RAINY DAYS</label>
-      <div class="metric">${rainyDays}</div>
-      <div class="sub">0.1 mm or more</div>
-    </div>
-  </div>
+        <div style="border-top:1px solid #dfe5ec;margin:14px 0;"></div>
 
- <div class="panel" style="grid-column:1 / -1;">
-  <div class="panel" style="grid-column:1 / -1;">
-  <h2>2026 rainfall performance</h2>
+        <div class="list">
+          <div class="list-row">
+            <span><b>2026 to date</b></span>
+            <b>${money(currentYTD)}</b>
+          </div>
 
-  <div class="list">
-    <div class="list-row">
-      <span><b>2026 to date</b></span>
-      <b>${money(currentYTD)}</b>
-    </div>
+          <div class="list-row">
+            <span>${previousYear} to same date</span>
+            <b>${money(previousYearYTD)}</b>
+          </div>
 
-    <div class="list-row">
-      <span>Historical average to same date</span>
-      <b>${money(historicalAverageYTD)}</b>
-    </div>
+          <div class="list-row">
+            <span>Difference</span>
+            <b>${money(previousYearDifference)} (${previousYearPercentage===null?'—':previousYearPercentage.toFixed(1)+'%'})</b>
+          </div>
+        </div>
+      </div>
 
-    <div class="list-row">
-      <span>Difference</span>
-      <b>${money(ytdDifference)} (${ytdPercentage.toFixed(1)}%)</b>
-    </div>
-  </div>
+      <div class="card">
+        <label>TOTAL RAINFALL</label>
+        <div class="metric">${money(total)}</div>
+        <div class="sub">${rows.length} records</div>
+      </div>
 
-  <div style="border-top:1px solid #dfe5ec;margin:14px 0;"></div>
+      <div class="card">
+        <label>AVERAGE ANNUAL</label>
+        <div class="metric">${money(averageAnnual)}</div>
+        <div class="sub">${years.length} years</div>
+      </div>
 
-  <div class="list">
-    <div class="list-row">
-      <span><b>2026 to date</b></span>
-      <b>${money(currentYTD)}</b>
-    </div>
+      <div class="card">
+        <label>WETTEST YEAR</label>
+        <div class="metric">${wettest.year}</div>
+        <div class="sub">${money(wettest.total)}</div>
+      </div>
 
-    <div class="list-row">
-      <span>${previousYear} to same date</span>
-      <b>${money(previousYearYTD)}</b>
-    </div>
+      <div class="card">
+        <label>DRIEST YEAR</label>
+        <div class="metric">${driest.year}</div>
+        <div class="sub">${money(driest.total)}</div>
+      </div>
 
-    <div class="list-row">
-      <span>Difference</span>
-      <b>${money(previousYearDifference)} (${previousYearPercentage===null?'—':previousYearPercentage.toFixed(1)+'%'})</b>
-    </div>
-  </div>
-</div>
-      <b>${money(currentYTD)}</b>
-    </div>
-    <div class="list-row">
-      <span>Historical average to same date</span>
-      <b>${money(historicalAverageYTD)}</b>
-    </div>
-    <div class="list-row">
-      <span>Difference</span>
-      <b>${money(ytdDifference)} (${ytdPercentage.toFixed(1)}%)</b>
-    </div>
-  </div>
-</div>
+      <div class="card">
+        <label>HIGHEST DAILY RAINFALL</label>
+        <div class="metric">${money(highest)}</div>
+        <div class="sub">Single day</div>
+      </div>
 
-<div class="panel" style="grid-column:1 / -1;">
-  <h2>Annual rainfall</h2>
-  ${chart(annual.map(x=>x.total),annual.map(x=>x.year))}
-</div>`;
+      <div class="card">
+        <label>RAINY DAYS</label>
+        <div class="metric">${rainyDays}</div>
+        <div class="sub">0.1 mm or more</div>
+      </div>
+
+      <div class="panel" style="grid-column:1 / -1;">
+        <h2>Annual rainfall</h2>
+        ${chart(annual.map(x=>x.total),annual.map(x=>x.year))}
+      </div>
+
+    </div>`;
 }
 function settings(){return `<div class="panel">
     <h2>Settings</h2>
