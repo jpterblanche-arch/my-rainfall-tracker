@@ -44,12 +44,3 @@
   grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   gap:18px;
 }
-@media(max-width:600px){
-  .chart-labels{
-    font-size:9px;
-  }
-
-  .chart-labels span:nth-child(odd):not(:first-child):not(:last-child){
-    display:none;
-  }
-}
