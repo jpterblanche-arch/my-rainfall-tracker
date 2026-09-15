@@ -276,8 +276,14 @@ function insights(){
           </div>
         </div>
 
-        <div style="border-top:1px solid #dfe5ec;margin:14px 0;"></div>
+      <div style="border-top:1px solid #dfe5ec;margin:14px 0;"></div>
 
+<div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
+  PREVIOUS YEAR COMPARISON
+</div>
+<div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
+  LONG-TERM COMPARISON
+</div>
         <div class="list">
           <div class="list-row">
             <span><b>2026 to date</b></span>
