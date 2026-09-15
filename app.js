@@ -258,6 +258,9 @@ function insights(){
 
       <div class="panel" style="grid-column:1 / -1;">
         <h2>2026 rainfall performance</h2>
+<div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
+  LONG-TERM COMPARISON
+</div>
 
         <div class="list">
           <div class="list-row">
@@ -281,9 +284,7 @@ function insights(){
 <div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
   PREVIOUS YEAR COMPARISON
 </div>
-<div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
-  LONG-TERM COMPARISON
-</div>
+
         <div class="list">
           <div class="list-row">
             <span><b>2026 to date</b></span>
