@@ -233,19 +233,7 @@ const driest=completeYears.reduce((a,b)=>b.total<a.total?b:a);
   const rainyDays=rainy(rows).length;
 
  return `<div class="grid insights-grid">
-  <div class="card">
-  <label>2026 RAINFALL TO DATE</label>
-  <div class="metric">${money(currentYTD)}</div>
-  <div class="sub">1 Jan to today</div>
-  <div class="sub">Historical average: ${money(historicalAverageYTD)}</div>
-  <div class="sub">${money(ytdDifference)} (${ytdPercentage.toFixed(1)}%) ${ytdDifference>=0?'above':'below'} average</div>
-</div>
-<div class="card">
-  <label>HISTORICAL AVERAGE TO DATE</label>
-  <div class="metric">${money(historicalAverageYTD)}</div>
-  <div class="sub">2011–2025, same date</div>
-</div>
-
+ 
     <div class="card">
       <label>TOTAL RAINFALL</label>
       <div class="metric">${money(total)}</div>
