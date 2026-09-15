@@ -184,6 +184,19 @@ function insights(){
   const currentYTD=rows
   .filter(r=>r.date.startsWith(currentYear+'-'))
   .reduce((n,r)=>n+Number(r.rainfall_mm),0);
+  const previousYear=String(Number(currentYear)-1);
+  const previousYearYTD=rows
+  .filter(r=>{
+    const d=r.date;
+    return d.startsWith(previousYear+'-') &&
+           d.slice(5,10)<=`${String(currentMonth).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
+  })
+  .reduce((n,r)=>n+Number(r.rainfall_mm),0);
+
+  const previousYearDifference=currentYTD-previousYearYTD;
+  const previousYearPercentage=previousYearYTD
+    ? (previousYearDifference/previousYearYTD)*100
+    : null;
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
   const historicalYTD=years
