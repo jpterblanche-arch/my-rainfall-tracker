@@ -6,6 +6,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 'public';
 
 let page = 'dashboard', editing = null, session = null;
+let intensityYear = String(new Date().getFullYear());
 
 const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
