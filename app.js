@@ -6,7 +6,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 'public';
 
 let page = 'dashboard', editing = null, session = null;
-let intensityYear = String(new Date().getFullYear());
+let intensityYear = 'all';
 
 const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
@@ -284,9 +284,9 @@ function drawCompare(){const a=$('#year-a').value,b=$('#year-b').value,rows=read
 function importer(){return `<div class="two"><div class="panel"><h2>Import rainfall data</h2><p class="sub">CSV headings: <code>date,rainfall_mm,notes</code></p><p class="sub">Duplicates, invalid dates, negative values, and invalid rainfall values are rejected.</p><div class="actions"><button class="primary" id="choose-file">Choose CSV file</button><button class="secondary" id="load-included">Load included rainfall history</button></div><div id="import-message" style="margin-top:14px"></div></div><div class="panel"><h2>Export data</h2><p class="sub">Download all stored rainfall records in a compatible CSV format.</p><button class="secondary" id="export-all">Export all records</button></div></div>`}
 function insights(){
   const rows=read();
-  const intensityRows=rows.filter(
-    r=>r.date.startsWith(intensityYear+'-')
-  );
+  const intensityRows=intensityYear==='all'
+  ? rows
+  : rows.filter(r=>r.date.startsWith(intensityYear+'-'));
   if(!rows.length)return empty();
 
   const today=new Date();
@@ -490,12 +490,13 @@ function insights(){
 <div style="display:flex;align-items:center;gap:10px;margin:10px 0 14px;">
   <label for="intensity-year"><b>Year</b></label>
   <select id="intensity-year">
-    ${years.map(y=>`
-      <option value="${y}" ${y===intensityYear?'selected':''}>${y}</option>
-    `).join('')}
-  </select>
+  <option value="all" ${intensityYear==='all'?'selected':''}>All</option>
+  ${years.map(y=>`
+    <option value="${y}" ${y===intensityYear?'selected':''}>${y}</option>
+  `).join('')}
+</select>
 </div>
-        <p class="sub">How rainfall days contributed to total rainfall.</p>
+        <p class="sub">How rainfall days contributed to total rainfall for ${intensityYear==='all'?'all years':intensityYear}.</p>
 
         <div class="wide">
           <table>
