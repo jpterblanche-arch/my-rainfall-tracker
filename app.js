@@ -3,8 +3,15 @@ const SUPABASE_URL = 'https://fevtbnljejxajqjackzp.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_taDB6yP24Hfv3yak3dzvDw_4npv4umc';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 'public';
+
 let page = 'dashboard', editing = null, session = null;
-const pages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
+
+const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
+
+const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights']];
+
+const pages = PUBLIC_VIEW ? publicPages : privatePages;
 const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1)} mm`;function syncStatus(text){
   const el=$('#sync-status');
   if(el)el.textContent=text;
@@ -35,6 +42,12 @@ async function loadFromSupabase(){
     return reloaded || [];
   }
 
+  localStorage.setItem(KEY, JSON.stringify(data || []));
+  return data || [];
+}
+async function loadPublicFromSupabase(){
+  const {data,error} = await db.from('rainfall').select('*').order('date',{ascending:false});
+  if(error) throw error;
   localStorage.setItem(KEY, JSON.stringify(data || []));
   return data || [];
 }
@@ -124,6 +137,21 @@ async function save(rows){
     if(error) showLogin(error.message);
   };
 }async function startApp(){
+
+  if(PUBLIC_VIEW){
+    session=null;
+
+    try{
+      await loadPublicFromSupabase();
+      nav();
+      render();
+    }catch(error){
+      showLogin(`Could not load rainfall data: ${error.message}`);
+    }
+
+    return;
+  }
+
   const {data,error}=await db.auth.getSession();
 
   if(error){
@@ -158,15 +186,95 @@ function empty(t='No rainfall records yet. Record rainfall or import a CSV file 
 function dashboard(){const rows=read(), now=new Date(), y=now.getFullYear(), m=now.getMonth(), month=byMonth(rows,y)[m], yr=rows.filter(r=>r.date.startsWith(y+'-')), latest=rows[0]; const months=byMonth(rows,y).map(sum); const last12=Array.from({length:12},(_,i)=>{const d=new Date(y,m-11+i,1), key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;return sum(rows.filter(r=>r.date.startsWith(key)))}); const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort(); return `<div class="cards"><div class="card"><label>THIS MONTH</label><div class="metric">${money(sum(month))}</div><div class="sub">${rainy(month).length} rainy days</div></div><div class="card"><label>HIGHEST DAILY</label><div class="metric">${money(Math.max(0,...month.map(r=>r.rainfall_mm)))}</div><div class="sub">This month</div></div><div class="card"><label>THIS YEAR</label><div class="metric">${money(sum(yr))}</div><div class="sub">${rainy(yr).length} rainy days</div></div><div class="card"><label>LATEST OBSERVATION</label><div class="metric">${latest?money(latest.rainfall_mm):'—'}</div><div class="sub">${latest?latest.date:'No records'}</div></div></div>${rows.length?`<div class="grid"><div class="panel"><h2>Monthly rainfall in ${y}</h2>${chart(months,Array.from({length:12},(_,i)=>monthName(i)))}</div><div class="panel"><h2>Current month details</h2><div class="list"><div class="list-row"><span>Average per rainy day</span><b>${money(rainy(month).length?sum(month)/rainy(month).length:0)}</b></div><div class="list-row"><span>Wettest month</span><b>${months.some(Boolean)?monthName(months.indexOf(Math.max(...months))):'—'}</b></div><div class="list-row"><span>Records stored</span><b>${rows.length}</b></div></div></div></div><div class="grid"><div class="panel"><h2>Rainfall over the previous 12 months</h2>${chart(last12,Array.from({length:12},(_,i)=>{const d=new Date(y,m-11+i,1);return d.toLocaleString(undefined,{month:'short'})}))}</div><div class="panel"><h2>Yearly totals</h2>${chart(years.map(yr=>sum(rows.filter(r=>r.date.startsWith(yr+'-')))),years)}</div></div>`:empty()}`}
 function record(){const r=editing||{date:new Date().toISOString().slice(0,10),rainfall_mm:'',notes:''};return `<div class="panel"><h2>${editing?'Edit rainfall record':'Record rainfall'}</h2><p class="sub">One quick record for your home rain gauge.</p><form class="form" id="record-form"><label class="field">Date<input required type="date" name="date" value="${r.date}"></label><label class="field">Rainfall (mm)<input required type="number" name="rainfall_mm" min="0" step="0.1" placeholder="0.0" value="${r.rainfall_mm}"></label><label class="field">Notes <span class="sub">(optional)</span><textarea name="notes" placeholder="e.g. overnight thunderstorm">${esc(r.notes)}</textarea></label><div><button class="primary">${editing?'Save changes':'Save rainfall'}</button> ${editing?'<button type="button" class="secondary" id="cancel-edit">Cancel</button>':''}</div></form></div>`}
 function filtered(){const f=$('#history-filters');let rows=read();if(!f)return rows;const x=Object.fromEntries(new FormData(f));return rows.filter(r=>(!x.search||`${r.date} ${r.notes}`.toLowerCase().includes(x.search.toLowerCase()))&&(!x.from||r.date>=x.from)&&(!x.to||r.date<=x.to)&&(!x.month||r.date.slice(5,7)===x.month)&&(!x.year||r.date.slice(0,4)===x.year));}
-function history(){const years=[...new Set(read().map(r=>r.date.slice(0,4)))].sort().reverse();return `<div class="panel"><div class="toolbar"><h2>Rainfall history</h2><button class="secondary" id="export-filtered">Export filtered CSV</button></div><form class="filters" id="history-filters"><input name="search" placeholder="Search notes or date"><input name="from" type="date"><input name="to" type="date"><select name="month"><option value="">All months</option>${Array.from({length:12},(_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${monthName(i)}</option>`)}</select><select name="year"><option value="">All years</option>${years.map(y=>`<option>${y}</option>`)}</select></form><div class="wide"><table><thead><tr><th>Date</th><th>Rainfall (mm)</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="history-body"></tbody></table></div></div>`}
-function drawHistory(){const rows=filtered();$('#history-body').innerHTML=rows.length?rows.map(r=>`<tr><td>${r.date}</td><td>${money(r.rainfall_mm)}</td><td>${esc(r.notes)}</td><td class="actions"><button class="link-btn" data-edit="${r.date}">Edit</button><button class="link-btn" data-delete="${r.date}">Delete</button></td></tr>`).join(''):'<tr><td colspan="4">No matching records.</td></tr>';document.querySelectorAll('[data-edit]').forEach(x=>x.onclick=async()=>{editing=read().find(r=>r.date===x.dataset.edit);page='record';nav();render()});document.querySelectorAll('[data-delete]').forEach(x=>x.onclick=async()=>{if(confirm(`Delete the record for ${x.dataset.delete}?`)){
-  try{
-    await save(read().filter(r=>r.date!==x.dataset.delete));
-    drawHistory();
-  }catch(error){
-    alert(`Could not delete rainfall: ${error.message}`);
-  }
-}})}
+function history(){
+  const years=[...new Set(read().map(r=>r.date.slice(0,4)))].sort().reverse();
+
+  return `<div class="panel">
+    <div class="toolbar">
+      <h2>Rainfall history</h2>
+      ${PUBLIC_VIEW?'':'<button class="secondary" id="export-filtered">Export filtered CSV</button>'}
+    </div>
+
+    <form class="filters" id="history-filters">
+      <input name="search" placeholder="Search notes or date">
+      <input name="from" type="date">
+      <input name="to" type="date">
+
+      <select name="month">
+        <option value="">All months</option>
+        ${Array.from({length:12},(_,i)=>
+          `<option value="${String(i+1).padStart(2,'0')}">${monthName(i)}</option>`
+        )}
+      </select>
+
+      <select name="year">
+        <option value="">All years</option>
+        ${years.map(y=>`<option>${y}</option>`)}
+      </select>
+    </form>
+
+    <div class="wide">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Rainfall (mm)</th>
+            <th>Notes</th>
+            ${PUBLIC_VIEW?'':'<th>Actions</th>'}
+          </tr>
+        </thead>
+
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </div>`
+}
+
+
+function drawHistory(){
+  const rows=filtered();
+
+  $('#history-body').innerHTML=rows.length
+    ? rows.map(r=>PUBLIC_VIEW
+        ? `<tr>
+             <td>${r.date}</td>
+             <td>${money(r.rainfall_mm)}</td>
+             <td>${esc(r.notes)}</td>
+           </tr>`
+        : `<tr>
+             <td>${r.date}</td>
+             <td>${money(r.rainfall_mm)}</td>
+             <td>${esc(r.notes)}</td>
+             <td class="actions">
+               <button class="link-btn" data-edit="${r.date}">Edit</button>
+               <button class="link-btn" data-delete="${r.date}">Delete</button>
+             </td>
+           </tr>`
+      ).join('')
+    : `<tr>
+         <td colspan="${PUBLIC_VIEW?3:4}">No matching records.</td>
+       </tr>`;
+
+  if(PUBLIC_VIEW) return;
+
+  document.querySelectorAll('[data-edit]').forEach(x=>x.onclick=async()=>{
+    editing=read().find(r=>r.date===x.dataset.edit);
+    page='record';
+    nav();
+    render();
+  });
+
+  document.querySelectorAll('[data-delete]').forEach(x=>x.onclick=async()=>{
+    if(confirm(`Delete the record for ${x.dataset.delete}?`)){
+      try{
+        await save(read().filter(r=>r.date!==x.dataset.delete));
+        drawHistory();
+      }catch(error){
+        alert(`Could not delete rainfall: ${error.message}`);
+      }
+    }
+  });
+}
 function monthly(){const rows=read(), years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort().reverse(), y=years[0]||new Date().getFullYear();return `<div class="panel"><div class="toolbar"><h2>Monthly analysis</h2><select id="analysis-year">${(years.length?years:[y]).map(x=>`<option>${x}</option>`)}</select></div><div id="monthly-results"></div></div>`}
 function drawMonthly(){const y=$('#analysis-year').value, all=read(), months=byMonth(all,y), values=months.map(sum), wet=Math.max(...values,0), dry=Math.min(...values);$('#monthly-results').innerHTML=`<div class="cards"><div class="card"><label>ANNUAL TOTAL</label><div class="metric">${money(values.reduce((n,v)=>n+Number(v),0))}</div></div><div class="card"><label>WETTEST MONTH</label><div class="metric">${wet?monthName(values.indexOf(wet)):'—'}</div></div><div class="card"><label>DRIEST MONTH</label><div class="metric">${monthName(values.indexOf(dry))}</div></div><div class="card"><label>RAINY DAYS</label><div class="metric">${rainy(months.flat()).length}</div></div></div><div class="grid"><div class="panel"><h2>Monthly rainfall</h2>${chart(values,Array.from({length:12},(_,i)=>monthName(i)))}</div><div class="panel"><h2>Summary</h2><div class="list"><div class="list-row"><span>Average monthly rainfall</span><b>${money(values.reduce((n,v)=>n+Number(v),0)/12)}</b></div><div class="list-row"><span>Maximum daily rainfall</span><b>${money(Math.max(0,...months.flat().map(r=>r.rainfall_mm)))}</b></div></div></div></div><div class="wide"><table class="stat-table"><thead><tr><th>Month</th><th>Rainfall (mm)</th><th>Rainy days</th><th>Maximum daily rainfall</th></tr></thead><tbody>${months.map((rs,i)=>`<tr><td>${monthName(i)}</td><td>${money(sum(rs))}</td><td>${rainy(rs).length}</td><td>${money(Math.max(0,...rs.map(r=>r.rainfall_mm)))}</td></tr>`).join('')}</tbody></table></div>`}
 function yearly(){const rows=read(), years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();if(!years.length)return empty();const metrics=years.map(y=>{const rs=rows.filter(r=>r.date.startsWith(y+'-')), ms=byMonth(rows,y).map(sum), max=Math.max(...ms);return [y,rs,ms,max]});return `<div class="panel"><h2>Yearly rainfall</h2>${chart(metrics.map(x=>sum(x[1])),years)}<div class="wide"><table class="stat-table"><thead><tr><th>Year</th><th>Annual rainfall</th><th>Rainy days</th><th>Wettest month</th><th>Maximum daily rainfall</th></tr></thead><tbody>${metrics.map(([y,rs,ms,max])=>`<tr><td>${y}</td><td>${money(sum(rs))}</td><td>${rainy(rs).length}</td><td>${monthName(ms.indexOf(max))}</td><td>${money(Math.max(0,...rs.map(r=>r.rainfall_mm)))}</td></tr>`).join('')}</tbody></table></div></div>`}
@@ -365,7 +473,11 @@ try{
   e.target.reset();
 }catch(error){
   message(`Could not save rainfall: ${error.message}`,true);
-}};$('#cancel-edit')?.addEventListener('click',()=>go('history'))}if(page==='history'){$('#history-filters').oninput=drawHistory;$('#export-filtered').onclick=()=>exportCsv(filtered());drawHistory()}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='compare'){$('#year-a').onchange=drawCompare;$('#year-b').onchange=drawCompare;drawCompare()}if(page==='import'){$('#choose-file').onclick=()=>$('#csv-file').click();$('#load-included').onclick=async()=>{try{const response=await fetch('Rainfall-import-v2.csv');if(!response.ok)throw new Error('included CSV was not found');completeImport(await response.text())}catch(error){$('#import-message').innerHTML=`<div class="error">Could not load the included rainfall history: ${esc(error.message)}</div>`}};$('#export-all').onclick=()=>exportCsv(read())}
+}};$('#cancel-edit')?.addEventListener('click',()=>go('history'))}if(page==='history'){
+  $('#history-filters').oninput=drawHistory;
+  if(!PUBLIC_VIEW) $('#export-filtered').onclick=()=>exportCsv(filtered());
+  drawHistory();
+}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='compare'){$('#year-a').onchange=drawCompare;$('#year-b').onchange=drawCompare;drawCompare()}if(page==='import'){$('#choose-file').onclick=()=>$('#csv-file').click();$('#load-included').onclick=async()=>{try{const response=await fetch('Rainfall-import-v2.csv');if(!response.ok)throw new Error('included CSV was not found');completeImport(await response.text())}catch(error){$('#import-message').innerHTML=`<div class="error">Could not load the included rainfall history: ${esc(error.message)}</div>`}};$('#export-all').onclick=()=>exportCsv(read())}
 
 if(page==='settings'){
   $('#sign-out').onclick=async()=>{
