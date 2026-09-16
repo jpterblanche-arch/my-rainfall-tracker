@@ -485,7 +485,16 @@ function insights(){
         <div class="sub">0.1 mm or more</div>
       </div>
  <div class="panel" style="grid-column:1 / -1;">
-        <h2>Rainfall intensity & contribution</h2>
+       <h2>Rainfall intensity & contribution</h2>
+
+<div style="display:flex;align-items:center;gap:10px;margin:10px 0 14px;">
+  <label for="intensity-year"><b>Year</b></label>
+  <select id="intensity-year">
+    ${years.map(y=>`
+      <option value="${y}" ${y===intensityYear?'selected':''}>${y}</option>
+    `).join('')}
+  </select>
+</div>
         <p class="sub">How rainfall days contributed to total rainfall.</p>
 
         <div class="wide">
@@ -632,7 +641,12 @@ try{
   $('#history-filters').oninput=drawHistory;
   if(!PUBLIC_VIEW) $('#export-filtered').onclick=()=>exportCsv(filtered());
   drawHistory();
-}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='compare'){$('#year-a').onchange=drawCompare;$('#year-b').onchange=drawCompare;drawCompare()}if(page==='import'){$('#choose-file').onclick=()=>$('#csv-file').click();$('#load-included').onclick=async()=>{try{const response=await fetch('Rainfall-import-v2.csv');if(!response.ok)throw new Error('included CSV was not found');completeImport(await response.text())}catch(error){$('#import-message').innerHTML=`<div class="error">Could not load the included rainfall history: ${esc(error.message)}</div>`}};$('#export-all').onclick=()=>exportCsv(read())}
+}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='insights'){
+  $('#intensity-year').onchange=e=>{
+    intensityYear=e.target.value;
+    render();
+  };
+}if(page==='compare'){$('#year-a').onchange=drawCompare;$('#year-b').onchange=drawCompare;drawCompare()}if(page==='import'){$('#choose-file').onclick=()=>$('#csv-file').click();$('#load-included').onclick=async()=>{try{const response=await fetch('Rainfall-import-v2.csv');if(!response.ok)throw new Error('included CSV was not found');completeImport(await response.text())}catch(error){$('#import-message').innerHTML=`<div class="error">Could not load the included rainfall history: ${esc(error.message)}</div>`}};$('#export-all').onclick=()=>exportCsv(read())}
 
 if(page==='settings'){
   $('#sign-out').onclick=async()=>{
