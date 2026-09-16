@@ -361,7 +361,6 @@ function insights(){
 
   const rainyDays=rainy(rows).length;
   const intensityBands=[
-    {name:'No rain',min:0,max:0},
     {name:'Very light',min:0.1,max:1},
     {name:'Light',min:1.1,max:5},
     {name:'Light–moderate',min:5.1,max:10},
