@@ -361,13 +361,13 @@ function insights(){
 
   const rainyDays=rainy(rows).length;
   const intensityBands=[
-    {name:'Very light',min:0.1,max:1},
-    {name:'Light',min:1.1,max:5},
-    {name:'Light–moderate',min:5.1,max:10},
-    {name:'Moderate',min:10.1,max:20},
-    {name:'Heavy',min:20.1,max:50},
-    {name:'Very heavy',min:50.1,max:100},
-    {name:'Extreme',min:100.1,max:Infinity}
+    {name:'Very light (0.1–1 mm)',min:0.1,max:1},
+    {name:'Light (1.1–5 mm)',min:1.1,max:5},
+    {name:'Light–moderate (5.1–10 mm)',min:5.1,max:10},
+    {name:'Moderate (10.1–20 mm)',min:10.1,max:20},
+    {name:'Heavy (20.1–50 mm)',min:20.1,max:50},
+    {name:'Very heavy (50.1–100 mm)',min:50.1,max:100},
+    {name:'Extreme (>100 mm)',min:100.1,max:Infinity}
   ];
 
   const intensityAnalysis=intensityBands.map(band=>{
