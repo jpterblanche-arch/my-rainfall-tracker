@@ -569,27 +569,35 @@ function matrix(){
       <div class="wide">
         <table>
           <thead>
-            <tr>
-              <th>Month</th>
-              ${years.map(year=>`<th>${year}</th>`).join('')}
-            </tr>
-          </thead>
+  <tr>
+    <th>Month</th>
+    ${years.map(year=>`
+      <th style="${year===String(new Date().getFullYear())?'font-weight:700;':''}">
+        ${year}
+      </th>
+    `).join('')}
+  </tr>
+</thead>
 
           <tbody>
             ${monthlyData.map(row=>`
               <tr>
                 <td><b>${row.month}</b></td>
-                ${row.values.map(value=>`
-                  <td style="white-space:nowrap;">${money(value)}</td>
-                `).join('')}
+                ${row.values.map((value,index)=>`
+  <td style="white-space:nowrap;${years[index]===String(new Date().getFullYear())?'font-weight:700;':''}">
+    ${money(value)}
+  </td>
+`).join('')}
               </tr>
             `).join('')}
 
             <tr>
               <td><b>Total</b></td>
-              ${yearTotals.map(total=>`
-                <td><b>${money(total)}</b></td>
-              `).join('')}
+              ${yearTotals.map((total,index)=>`
+  <td style="font-weight:${years[index]===String(new Date().getFullYear())?'700':'400'};">
+    <b>${money(total)}</b>
+  </td>
+`).join('')}
             </tr>
           </tbody>
         </table>
