@@ -284,6 +284,9 @@ function drawCompare(){const a=$('#year-a').value,b=$('#year-b').value,rows=read
 function importer(){return `<div class="two"><div class="panel"><h2>Import rainfall data</h2><p class="sub">CSV headings: <code>date,rainfall_mm,notes</code></p><p class="sub">Duplicates, invalid dates, negative values, and invalid rainfall values are rejected.</p><div class="actions"><button class="primary" id="choose-file">Choose CSV file</button><button class="secondary" id="load-included">Load included rainfall history</button></div><div id="import-message" style="margin-top:14px"></div></div><div class="panel"><h2>Export data</h2><p class="sub">Download all stored rainfall records in a compatible CSV format.</p><button class="secondary" id="export-all">Export all records</button></div></div>`}
 function insights(){
   const rows=read();
+  const intensityRows=rows.filter(
+    r=>r.date.startsWith(intensityYear+'-')
+  );
   if(!rows.length)return empty();
 
   const today=new Date();
@@ -372,7 +375,7 @@ function insights(){
   ];
 
   const intensityAnalysis=intensityBands.map(band=>{
-    const bandRows=rows.filter(r=>{
+    const bandRows=intensityRows.filter(r=>{
       const value=Number(r.rainfall_mm);
       return value>=band.min && value<=band.max;
     });
@@ -388,11 +391,11 @@ function insights(){
     };
   });
 
-  const totalRainfallForIntensity=rows.reduce(
+  const totalRainfallForIntensity=intensityRows.reduce(
     (n,r)=>n+Number(r.rainfall_mm),0
   );
 
-  const rainyDaysForIntensity=rows.filter(
+  const rainyDaysForIntensity=intensityRows.filter(
     r=>Number(r.rainfall_mm)>0
   ).length;
 
