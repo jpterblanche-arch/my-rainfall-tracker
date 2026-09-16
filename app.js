@@ -580,7 +580,7 @@ function matrix(){
               <tr>
                 <td><b>${row.month}</b></td>
                 ${row.values.map(value=>`
-                  <td>${money(value)}</td>
+                  <td style="white-space:nowrap;">${money(value)}</td>
                 `).join('')}
               </tr>
             `).join('')}
