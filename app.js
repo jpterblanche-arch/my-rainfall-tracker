@@ -481,6 +481,44 @@ function insights(){
         <div class="metric">${rainyDays}</div>
         <div class="sub">0.1 mm or more</div>
       </div>
+ <div class="panel" style="grid-column:1 / -1;">
+        <h2>Rainfall intensity & contribution</h2>
+        <p class="sub">How rainfall days contributed to total rainfall.</p>
+
+        <div class="wide">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Rainy days</th>
+                <th>% of rainy days</th>
+                <th>Rainfall (mm)</th>
+                <th>% of total rainfall</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${intensityAnalysis.map(x=>`
+                <tr>
+                  <td><b>${x.name}</b></td>
+                  <td>${x.days}</td>
+                  <td>${rainyDaysForIntensity ? ((x.days/rainyDaysForIntensity)*100).toFixed(1)+'%' : '—'}</td>
+                  <td>${money(x.rainfall)}</td>
+                  <td>${totalRainfallForIntensity ? ((x.rainfall/totalRainfallForIntensity)*100).toFixed(1)+'%' : '—'}</td>
+                </tr>
+              `).join('')}
+
+              <tr>
+                <td><b>Total</b></td>
+                <td><b>${rainyDaysForIntensity}</b></td>
+                <td><b>100.0%</b></td>
+                <td><b>${money(totalRainfallForIntensity)}</b></td>
+                <td><b>100.0%</b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <div class="panel" style="grid-column:1 / -1;">
         <h2>Annual rainfall</h2>
