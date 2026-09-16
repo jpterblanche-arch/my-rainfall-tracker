@@ -360,6 +360,41 @@ function insights(){
   );
 
   const rainyDays=rainy(rows).length;
+  const intensityBands=[
+    {name:'No rain',min:0,max:0},
+    {name:'Very light',min:0.1,max:1},
+    {name:'Light',min:1.1,max:5},
+    {name:'Light–moderate',min:5.1,max:10},
+    {name:'Moderate',min:10.1,max:20},
+    {name:'Heavy',min:20.1,max:50},
+    {name:'Very heavy',min:50.1,max:100},
+    {name:'Extreme',min:100.1,max:Infinity}
+  ];
+
+  const intensityAnalysis=intensityBands.map(band=>{
+    const bandRows=rows.filter(r=>{
+      const value=Number(r.rainfall_mm);
+      return value>=band.min && value<=band.max;
+    });
+
+    const rainfall=bandRows.reduce(
+      (n,r)=>n+Number(r.rainfall_mm),0
+    );
+
+    return {
+      name:band.name,
+      days:bandRows.length,
+      rainfall
+    };
+  });
+
+  const totalRainfallForIntensity=rows.reduce(
+    (n,r)=>n+Number(r.rainfall_mm),0
+  );
+
+  const rainyDaysForIntensity=rows.filter(
+    r=>Number(r.rainfall_mm)>0
+  ).length;
 
   return `
     <div class="grid insights-grid">
