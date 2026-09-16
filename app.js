@@ -7,9 +7,9 @@ const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 
 
 let page = 'dashboard', editing = null, session = null;
 
-const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
+const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
-const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights']];
+const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights']];
 
 const pages = PUBLIC_VIEW ? publicPages : privatePages;
 const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1)} mm`;function syncStatus(text){
