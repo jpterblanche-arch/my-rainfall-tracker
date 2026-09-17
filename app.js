@@ -13,7 +13,17 @@ const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['h
 const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights']];
 
 const pages = PUBLIC_VIEW ? publicPages : privatePages;
-const $ = s => document.querySelector(s), money = n => `${Number(n||0).toFixed(1)} mm`;function syncStatus(text){
+const $ = s => document.querySelector(s);
+
+const money = n => {
+  const value = Number(n || 0);
+  const formatted = value.toLocaleString('fr-FR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  }).replace(/\u202F/g, ' ');
+
+  return `${formatted} mm`;
+};function syncStatus(text){
   const el=$('#sync-status');
   if(el)el.textContent=text;
 }
