@@ -580,10 +580,15 @@ function matrix(){
       (total,value)=>total+value,0
     );
 
+    const highest=Math.max(...monthlyTotals);
+    const lowest=Math.min(...monthlyTotals);
+
     return {
       year,
       monthlyTotals,
-      annualTotal
+      annualTotal,
+      highest,
+      lowest
     };
   });
 
@@ -593,7 +598,7 @@ function matrix(){
       <div class="toolbar">
         <div>
           <h2>Monthly rainfall matrix</h2>
-          <p class="sub">Monthly rainfall totals by year (mm).</p>
+          <p class="sub">Monthly rainfall totals by year.</p>
         </div>
 
         <div style="display:flex;align-items:center;gap:10px;">
@@ -632,11 +637,25 @@ function matrix(){
                   <b>${row.year}</b>
                 </td>
 
-                ${row.monthlyTotals.map(value=>`
-                  <td style="white-space:nowrap;">
-                    ${money(value).replace(' mm','')}
-                  </td>
-                `).join('')}
+                ${row.monthlyTotals.map(value=>{
+
+                  const isHighest=value===row.highest;
+                  const isLowest=value===row.lowest;
+
+                  let background='';
+
+                  if(isHighest && row.highest>0){
+                    background='background:#e8f5e9;';
+                  }else if(isLowest){
+                    background='background:#f5f5f5;';
+                  }
+
+                  return `
+                    <td style="white-space:nowrap;${background}">
+                      ${money(value).replace(' mm','')}
+                    </td>
+                  `;
+                }).join('')}
 
                 <td style="white-space:nowrap;">
                   <b>${money(row.annualTotal).replace(' mm','')}</b>
@@ -650,6 +669,10 @@ function matrix(){
         </table>
 
       </div>
+
+      <p class="sub" style="margin-top:10px;">
+        Highest monthly rainfall is highlighted. Months with the lowest rainfall are shown subtly.
+      </p>
 
     </div>
   `;
