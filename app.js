@@ -562,27 +562,29 @@ function matrix(){
     'July','August','September','October','November','December'
   ];
 
-  const monthlyData=monthNames.map((month,index)=>{
-    const monthNumber=String(index+1).padStart(2,'0');
+  const yearData=years.map(year=>{
+    const monthlyTotals=monthNames.map((month,index)=>{
+      const monthNumber=String(index+1).padStart(2,'0');
+
+      return rows
+        .filter(r=>r.date.startsWith(`${year}-${monthNumber}-`))
+        .reduce((total,r)=>total+Number(r.rainfall_mm),0);
+    });
+
+    const annualTotal=monthlyTotals.reduce(
+      (total,value)=>total+value,0
+    );
 
     return {
-      month,
-      values:years.map(year=>{
-        return rows
-          .filter(r=>r.date.startsWith(`${year}-${monthNumber}-`))
-          .reduce((total,r)=>total+Number(r.rainfall_mm),0);
-      })
+      year,
+      monthlyTotals,
+      annualTotal
     };
   });
 
-  const yearTotals=years.map(year=>
-    rows
-      .filter(r=>r.date.startsWith(`${year}-`))
-      .reduce((total,r)=>total+Number(r.rainfall_mm),0)
-  );
-
   return `
     <div class="panel">
+
       <div class="toolbar">
         <div>
           <h2>Monthly rainfall matrix</h2>
@@ -590,42 +592,50 @@ function matrix(){
         </div>
       </div>
 
-      <div class="wide">
-        <table>
+      <div class="wide" style="overflow-x:auto;">
+
+        <table style="min-width:1100px;">
+
           <thead>
-  <tr>
-    <th>Month</th>
-    ${years.map(year=>`
-      <th style="${year===String(new Date().getFullYear())?'font-weight:700;':''}">
-        ${year}
-      </th>
-    `).join('')}
-  </tr>
-</thead>
+            <tr>
+              <th>Year</th>
+
+              ${monthNames.map(month=>`
+                <th>${month.slice(0,3)}</th>
+              `).join('')}
+
+              <th>Total</th>
+            </tr>
+          </thead>
 
           <tbody>
-            ${monthlyData.map(row=>`
+
+            ${yearData.map(row=>`
               <tr>
-                <td><b>${row.month}</b></td>
-                ${row.values.map((value,index)=>`
-  <td style="white-space:nowrap;${years[index]===String(new Date().getFullYear())?'font-weight:700;':''}">
-    ${money(value)}
-  </td>
-`).join('')}
+
+                <td>
+                  <b>${row.year}</b>
+                </td>
+
+                ${row.monthlyTotals.map(value=>`
+                  <td style="white-space:nowrap;">
+                    ${money(value)}
+                  </td>
+                `).join('')}
+
+                <td style="white-space:nowrap;">
+                  <b>${money(row.annualTotal)}</b>
+                </td>
+
               </tr>
             `).join('')}
 
-            <tr>
-              <td><b>Total</b></td>
-              ${yearTotals.map((total,index)=>`
-  <td style="font-weight:${years[index]===String(new Date().getFullYear())?'700':'400'};">
-    <b>${money(total)}</b>
-  </td>
-`).join('')}
-            </tr>
           </tbody>
+
         </table>
+
       </div>
+
     </div>
   `;
 }
