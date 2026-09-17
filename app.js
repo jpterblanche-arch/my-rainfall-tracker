@@ -489,7 +489,7 @@ function insights(){
 
 <div style="display:flex;align-items:center;gap:10px;margin:10px 0 14px;">
   <label for="intensity-year"><b>Year</b></label>
-  <select id="intensity-year">
+  <select id="intensity-year" style="font-size:16px;padding:8px 12px;min-width:110px;">
   <option value="all" ${intensityYear==='all'?'selected':''}>All</option>
   ${years.map(y=>`
     <option value="${y}" ${y===intensityYear?'selected':''}>${y}</option>
