@@ -7,6 +7,7 @@ const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 
 
 let page = 'dashboard', editing = null, session = null;
 let intensityYear = 'all';
+let matrixYear = 'all';
 
 const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
@@ -557,12 +558,16 @@ function matrix(){
     rows.map(r=>r.date.slice(0,4))
   )].sort();
 
+  const selectedYears=matrixYear==='all'
+    ? years
+    : years.filter(y=>y===matrixYear);
+
   const monthNames=[
     'January','February','March','April','May','June',
     'July','August','September','October','November','December'
   ];
 
-  const yearData=years.map(year=>{
+  const yearData=selectedYears.map(year=>{
     const monthlyTotals=monthNames.map((month,index)=>{
       const monthNumber=String(index+1).padStart(2,'0');
 
@@ -589,6 +594,16 @@ function matrix(){
         <div>
           <h2>Monthly rainfall matrix</h2>
           <p class="sub">Monthly rainfall totals by year.</p>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;">
+          <label for="matrix-year"><b>Year</b></label>
+          <select id="matrix-year" style="font-size:16px;padding:8px 12px;min-width:110px;">
+            <option value="all" ${matrixYear==='all'?'selected':''}>All</option>
+            ${years.map(y=>`
+              <option value="${y}" ${y===matrixYear?'selected':''}>${y}</option>
+            `).join('')}
+          </select>
         </div>
       </div>
 
@@ -662,7 +677,7 @@ try{
   $('#history-filters').oninput=drawHistory;
   if(!PUBLIC_VIEW) $('#export-filtered').onclick=()=>exportCsv(filtered());
   drawHistory();
-}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='insights'){
+}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='insights'){
   $('#intensity-year').onchange=e=>{
     intensityYear=e.target.value;
     render();
