@@ -662,33 +662,110 @@ function settings(){return `<div class="panel">
   </div>`
 }
 function exportCsv(rows){const csv=['date,rainfall_mm,notes',...rows.map(r=>`${r.date},${r.rainfall_mm},"${String(r.notes||'').replaceAll('"','""')}"`)].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='rainfall-records.csv';a.click();URL.revokeObjectURL(a.href)}
-function bind(){if(page==='record'){$('#record-form').onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target)), rows=read(), n=Number(v.rainfall_mm);if(!v.date||!Number.isFinite(n)||n<0)return message('Rainfall must be a valid value of 0 mm or more.',true);if(rows.some(r=>r.date===v.date)&&(!editing||editing.date!==v.date))return message('A rainfall record already exists for this date.',true);if(editing)rows.splice(rows.findIndex(r=>r.date===editing.date),1);
-const newRecord={date:v.date,rainfall_mm:n,notes:v.notes.trim()};
-if(editing&&editing.id)newRecord.id=editing.id;
-rows.push(newRecord);
-try{
-  await save(rows);
-  editing=null;
-  message('Rainfall record saved.');
-  e.target.reset();
-}catch(error){
-  message(`Could not save rainfall: ${error.message}`,true);
-}};$('#cancel-edit')?.addEventListener('click',()=>go('history'))}if(page==='history'){
-  $('#history-filters').oninput=drawHistory;
-  if(!PUBLIC_VIEW) $('#export-filtered').onclick=()=>exportCsv(filtered());
-  drawHistory();
-}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}}if(page==='monthly'){$('#analysis-year').onchange=drawMonthly;drawMonthly()}if(page==='insights'){
-  $('#intensity-year').onchange=e=>{
-    intensityYear=e.target.value;
-    render();
-  };
-}if(page==='compare'){$('#year-a').onchange=drawCompare;$('#year-b').onchange=drawCompare;drawCompare()}if(page==='import'){$('#choose-file').onclick=()=>$('#csv-file').click();$('#load-included').onclick=async()=>{try{const response=await fetch('Rainfall-import-v2.csv');if(!response.ok)throw new Error('included CSV was not found');completeImport(await response.text())}catch(error){$('#import-message').innerHTML=`<div class="error">Could not load the included rainfall history: ${esc(error.message)}</div>`}};$('#export-all').onclick=()=>exportCsv(read())}
+function bind(){
 
-if(page==='settings'){
-  $('#sign-out').onclick=async()=>{
-    await db.auth.signOut();
-  };
-}}
+  if(page==='record'){
+    $('#record-form').onsubmit=async e=>{
+      e.preventDefault();
+
+      const v=Object.fromEntries(new FormData(e.target));
+      const rows=read();
+      const n=Number(v.rainfall_mm);
+
+      if(!v.date||!Number.isFinite(n)||n<0)
+        return message('Rainfall must be a valid value of 0 mm or more.',true);
+
+      if(rows.some(r=>r.date===v.date)&&(!editing||editing.date!==v.date))
+        return message('A rainfall record already exists for this date.',true);
+
+      if(editing)
+        rows.splice(rows.findIndex(r=>r.date===editing.date),1);
+
+      const newRecord={
+        date:v.date,
+        rainfall_mm:n,
+        notes:v.notes.trim()
+      };
+
+      if(editing&&editing.id)
+        newRecord.id=editing.id;
+
+      rows.push(newRecord);
+
+      try{
+        await save(rows);
+        editing=null;
+        message('Rainfall record saved.');
+        e.target.reset();
+      }catch(error){
+        message(`Could not save rainfall: ${error.message}`,true);
+      }
+    };
+
+    $('#cancel-edit')?.addEventListener('click',()=>go('history'));
+  }
+
+  if(page==='history'){
+    $('#history-filters').oninput=drawHistory;
+
+    if(!PUBLIC_VIEW)
+      $('#export-filtered').onclick=()=>exportCsv(filtered());
+
+    drawHistory();
+  }
+
+  if(page==='monthly'){
+    $('#analysis-year').onchange=drawMonthly;
+    drawMonthly();
+  }
+
+  if(page==='insights'){
+    $('#intensity-year').onchange=e=>{
+      intensityYear=e.target.value;
+      render();
+    };
+  }
+
+  if(page==='matrix'){
+    $('#matrix-year').onchange=e=>{
+      matrixYear=e.target.value;
+      render();
+    };
+  }
+
+  if(page==='compare'){
+    $('#year-a').onchange=drawCompare;
+    $('#year-b').onchange=drawCompare;
+    drawCompare();
+  }
+
+  if(page==='import'){
+    $('#choose-file').onclick=()=>$('#csv-file').click();
+
+    $('#load-included').onclick=async()=>{
+      try{
+        const response=await fetch('Rainfall-import-v2.csv');
+
+        if(!response.ok)
+          throw new Error('included CSV was not found');
+
+        completeImport(await response.text());
+
+      }catch(error){
+        $('#import-message').innerHTML=
+          `<div class="error">Could not load the included rainfall history: ${esc(error.message)}</div>`;
+      }
+    };
+
+    $('#export-all').onclick=()=>exportCsv(read());
+  }
+
+  if(page==='settings'){
+    $('#sign-out').onclick=async()=>{
+      await db.auth.signOut();
+    };
+  }
+}
 function message(t,bad=false){const old=$('#record-form')?.previousElementSibling;if(old?.classList.contains('notice')||old?.classList.contains('error'))old.remove();$('#record-form')?.insertAdjacentHTML('beforebegin',`<div class="${bad?'error':'notice'}">${t}</div>`)}
 function render(){const views={dashboard,record,history,monthly,matrix,yearly,compare,insights,import:importer,settings};$('#content').innerHTML=views[page]();bind()}
 function parseCsvLine(line){const fields=[];let value='',quoted=false;for(let i=0;i<line.length;i++){const character=line[i];if(character==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++}else quoted=!quoted}else if(character===','&&!quoted){fields.push(value);value=''}else value+=character}if(quoted)return {error:'unclosed quoted field'};fields.push(value);return {fields}}
