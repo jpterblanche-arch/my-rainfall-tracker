@@ -592,6 +592,32 @@ function matrix(){
     };
   });
 
+  // Historical average:
+  // Exclude 2010 and the current incomplete year.
+  const currentYear=String(new Date().getFullYear());
+
+  const averageYears=years.filter(
+    year=>year!=='2010' && year!==currentYear
+  );
+
+  const averageMonthlyTotals=monthNames.map((month,index)=>{
+    const monthNumber=String(index+1).padStart(2,'0');
+
+    const totals=averageYears.map(year=>
+      rows
+        .filter(r=>r.date.startsWith(`${year}-${monthNumber}-`))
+        .reduce((total,r)=>total+Number(r.rainfall_mm),0)
+    );
+
+    return totals.length
+      ? totals.reduce((total,value)=>total+value,0)/totals.length
+      : 0;
+  });
+
+  const averageAnnualTotal=averageMonthlyTotals.reduce(
+    (total,value)=>total+value,0
+  );
+
   return `
     <div class="panel">
 
@@ -664,6 +690,22 @@ function matrix(){
               </tr>
             `).join('')}
 
+            <tr style="border-top:2px solid #dfe5ec;">
+              <td>
+                <b>Average</b>
+              </td>
+
+              ${averageMonthlyTotals.map(value=>`
+                <td style="white-space:nowrap;font-weight:700;">
+                  ${money(value).replace(' mm','')}
+                </td>
+              `).join('')}
+
+              <td style="white-space:nowrap;font-weight:700;">
+                ${money(averageAnnualTotal).replace(' mm','')}
+              </td>
+            </tr>
+
           </tbody>
 
         </table>
@@ -672,6 +714,7 @@ function matrix(){
 
       <p class="sub" style="margin-top:10px;">
         Highest monthly rainfall is highlighted. Months with the lowest rainfall are shown subtly.
+        Average is based on complete years from 2011 to ${Number(currentYear)-1}.
       </p>
 
     </div>
