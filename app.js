@@ -634,12 +634,12 @@ function matrix(){
 
                 ${row.monthlyTotals.map(value=>`
                   <td style="white-space:nowrap;">
-                    ${money(value)}
+                    ${money(value).replace(' mm','')}
                   </td>
                 `).join('')}
 
                 <td style="white-space:nowrap;">
-                  <b>${money(row.annualTotal)}</b>
+                  <b>${money(row.annualTotal).replace(' mm','')}</b>
                 </td>
 
               </tr>
