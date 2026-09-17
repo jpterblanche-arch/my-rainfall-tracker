@@ -593,7 +593,7 @@ function matrix(){
       <div class="toolbar">
         <div>
           <h2>Monthly rainfall matrix</h2>
-          <p class="sub">Monthly rainfall totals by year.</p>
+          <p class="sub">Monthly rainfall totals by year (mm).</p>
         </div>
 
         <div style="display:flex;align-items:center;gap:10px;">
