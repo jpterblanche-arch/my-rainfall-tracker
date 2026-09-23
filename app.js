@@ -294,56 +294,58 @@ function dashboard(){
 
       </div>
 
-      <div class="hero-comparison">
+    <div class="hero-comparison">
 
-        <div class="comparison-head">
+  <div class="comparison-head">
 
-          <span>
-            Progress against historical YTD average
-          </span>
+    <span>
+      ${y} YTD compared with historical average
+    </span>
 
-          <b>
-            ${
-              historicalAverageYTD
-              ? `${Math.abs(ytdPercentage).toFixed(1)}% ${
-                  ytdPercentage<0?'below':'above'
-                }`
-              : '—'
-            }
-          </b>
+    <b>
+      ${
+        historicalAverageYTD
+        ? `${Math.abs(ytdPercentage).toFixed(1)}% ${
+            ytdPercentage<0?'below':'above'
+          }`
+        : '—'
+      }
+    </b>
 
-        </div>
+  </div>
 
-        <div class="comparison-track">
+  <div class="comparison-track">
 
-          <div
-            class="comparison-current"
-            style="width:${
-              historicalAverageYTD
-                ? Math.min((ytd/historicalAverageYTD)*100,100)
-                : 0
-            }%"
-          ></div>
+    <div
+      class="comparison-current"
+      style="width:${
+        historicalAverageYTD
+          ? Math.min((ytd/historicalAverageYTD)*100,100)
+          : 0
+      }%"
+    ></div>
 
-          <div class="comparison-average"></div>
+    <div class="comparison-marker">
+      <span>Average</span>
+    </div>
 
-        </div>
+  </div>
 
-        <div class="comparison-labels">
+  <div class="comparison-labels">
 
-          <span>
-            ${y} YTD:
-            <b>${money(ytd)}</b>
-          </span>
+    <span>
+      ${y} YTD
+      <b>${money(ytd)}</b>
+    </span>
 
-          <span>
-            Historical average:
-            <b>${money(historicalAverageYTD)}</b>
-          </span>
+    <span>
+      Historical average
+      <b>${money(historicalAverageYTD)}</b>
+    </span>
 
-        </div>
+  </div>
 
-      </div>
+</div>
 
     </section>
 
