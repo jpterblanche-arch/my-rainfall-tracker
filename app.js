@@ -194,23 +194,6 @@ function go(p){page=p;editing=null; $('aside').classList.remove('open'); nav(); 
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
 function chart(values, labels){const max=Math.max(...values,1);return `<div class="chart">${values.map((v,i)=>`<div class="bar" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`}
-function monthlyDashboardChart(values, labels){
-  const max=Math.max(...values,1);
-
-  return `<div class="monthly-dashboard-chart">
-    ${values.map((v,i)=>`
-      <div class="monthly-chart-item">
-        <div class="monthly-chart-value">${Number(v).toFixed(1)}</div>
-        <div class="monthly-chart-bar-area">
-          <div class="monthly-chart-bar"
-               style="height:${Math.max(v?6:1,v/max*100)}%">
-          </div>
-        </div>
-        <div class="monthly-chart-label">${labels[i]}</div>
-      </div>
-    `).join('')}
-  </div>`;
-}
 function empty(t='No rainfall records yet. Record rainfall or import a CSV file to begin.'){return `<div class="empty">${t}</div>`}
 function dashboard(){
   const rows=read();
