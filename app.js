@@ -196,9 +196,24 @@ function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.d
 function chart(values, labels, detailed=false, highlights={}){
   const max=Math.max(...values,1);
 
-  if(detailed){
-   return `<div class="chart">${values.map((v,i)=>`<div class="bar ${highlights[labels[i]]||''}" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
-  }
+ if(detailed){
+  return `<div class="chart chart-detailed">
+    ${values.map((v,i)=>`
+      <div class="bar-wrap">
+        <div class="bar-value">${Number(v).toFixed(1)}</div>
+        <div class="bar-area">
+          <div
+            class="bar"
+            style="height:${Math.max(v?6:1,v/max*100)}%"
+            data-tip="${labels[i]}: ${money(v)}"
+            tabindex="0">
+          </div>
+        </div>
+        <div class="bar-label">${labels[i]}</div>
+      </div>
+    `).join('')}
+  </div>`;
+}
 
  return `<div class="chart">${values.map((v,i)=>`<div class="bar ${highlights[labels[i]]||''}" style="height:${Math.max(v?6:1,v/max*100)}%;${highlights[labels[i]]==='wettest-bar'?'background:linear-gradient(#4caf50,#2e8b36);':highlights[labels[i]]==='driest-bar'?'background:linear-gradient(#ef5350,#d32f2f);':''}" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
 }
