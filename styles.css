@@ -206,3 +206,47 @@
   }
 
 }
+.monthly-dashboard-chart{
+  height:245px;
+  display:flex;
+  gap:8px;
+  align-items:stretch;
+  padding-top:4px;
+}
+
+.monthly-chart-item{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.monthly-chart-value{
+  height:22px;
+  text-align:center;
+  font-size:10px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.monthly-chart-bar-area{
+  flex:1;
+  display:flex;
+  align-items:flex-end;
+  border-bottom:1px solid #dfe7ef;
+}
+
+.monthly-chart-bar{
+  width:100%;
+  min-height:2px;
+  background:linear-gradient(#33a5ea,#1769c2);
+  border-radius:5px 5px 0 0;
+}
+
+.monthly-chart-label{
+  height:24px;
+  padding-top:6px;
+  text-align:center;
+  font-size:10px;
+  color:var(--muted);
+}
