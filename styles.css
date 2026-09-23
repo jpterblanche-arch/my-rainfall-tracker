@@ -251,3 +251,11 @@
   font-size:10px;
   color:var(--muted);
 }
+/* Highlight wettest and driest years */
+.chart .wettest-bar{
+  background:linear-gradient(#4caf50,#2e8b36);
+}
+
+.chart .driest-bar{
+  background:linear-gradient(#ef5350,#d32f2f);
+}
