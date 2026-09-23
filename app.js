@@ -429,7 +429,7 @@ function dashboard(){
 
         <h2>Monthly rainfall in ${y}</h2>
 
-        ${monthlyDashboardChart(
+       ${chart(
   months,
   Array.from(
     {length:12},
