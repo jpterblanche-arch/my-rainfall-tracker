@@ -314,22 +314,18 @@ function dashboard(){
 
   </div>
 
-  <div class="comparison-track">
+ <div class="comparison-track">
 
-    <div
-      class="comparison-current"
-      style="width:${
-        historicalAverageYTD
-          ? Math.min((ytd/historicalAverageYTD)*100,100)
-          : 0
-      }%"
-    ></div>
+  <div
+    class="comparison-current"
+    style="width:${
+      historicalAverageYTD
+        ? Math.min((ytd/historicalAverageYTD)*100,100)
+        : 0
+    }%"
+  ></div>
 
-    <div class="comparison-marker">
-      <span>Average</span>
-    </div>
-
-  </div>
+</div>
 
   <div class="comparison-labels">
 
