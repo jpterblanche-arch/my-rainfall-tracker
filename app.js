@@ -525,7 +525,7 @@ function dashboard(){
                 {month:'short'}
               );
             }
-          )
+          ),true
         )}
 
       </div>
