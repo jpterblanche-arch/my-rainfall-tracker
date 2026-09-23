@@ -448,46 +448,57 @@ function dashboard(){
 
       <div class="panel">
 
-        <h2>Current month details</h2>
+       <h2>2026 rainfall insights</h2>
 
-        <div class="list">
+<div class="list">
 
-          <div class="list-row">
-            <span>Average per rainy day</span>
+  <div class="list-row">
+    <span>Rainy days this month</span>
 
-            <b>
-              ${money(
-                rainy(month).length
-                  ? sum(month)/rainy(month).length
-                  : 0
-              )}
-            </b>
-          </div>
+    <b>${rainy(month).length}</b>
+  </div>
 
-          <div class="list-row">
-            <span>Wettest month</span>
+  <div class="list-row">
+    <span>Average per rainy day</span>
 
-            <b>
-              ${
-                months.some(Boolean)
-                  ? monthName(
-                      months.indexOf(
-                        Math.max(...months)
-                      )
-                    )
-                  : '—'
-              }
-            </b>
-          </div>
+    <b>
+      ${money(
+        rainy(month).length
+          ? sum(month)/rainy(month).length
+          : 0
+      )}
+    </b>
+  </div>
 
-          <div class="list-row">
-            <span>Records stored</span>
+  <div class="list-row">
+    <span>Wettest month</span>
 
-            <b>${rows.length}</b>
-          </div>
+    <b>
+      ${
+        months.some(Boolean)
+          ? monthName(
+              months.indexOf(
+                Math.max(...months)
+              )
+            )
+          : '—'
+      }
+    </b>
+  </div>
 
-        </div>
+  <div class="list-row">
+    <span>Wettest month rainfall</span>
 
+    <b>
+      ${
+        months.some(Boolean)
+          ? money(Math.max(...months))
+          : '—'
+      }
+    </b>
+  </div>
+
+</div>
       </div>
 
     </div>
