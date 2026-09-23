@@ -195,7 +195,328 @@ function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.ra
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
 function chart(values, labels){const max=Math.max(...values,1);return `<div class="chart">${values.map((v,i)=>`<div class="bar" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`}
 function empty(t='No rainfall records yet. Record rainfall or import a CSV file to begin.'){return `<div class="empty">${t}</div>`}
-function dashboard(){const rows=read(), now=new Date(), y=now.getFullYear(), m=now.getMonth(), month=byMonth(rows,y)[m], yr=rows.filter(r=>r.date.startsWith(y+'-')), latest=rows[0]; const months=byMonth(rows,y).map(sum); const last12=Array.from({length:12},(_,i)=>{const d=new Date(y,m-11+i,1), key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;return sum(rows.filter(r=>r.date.startsWith(key)))}); const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort(); return `<div class="cards"><div class="card"><label>THIS MONTH</label><div class="metric">${money(sum(month))}</div><div class="sub">${rainy(month).length} rainy days</div></div><div class="card"><label>HIGHEST DAILY</label><div class="metric">${money(Math.max(0,...month.map(r=>r.rainfall_mm)))}</div><div class="sub">This month</div></div><div class="card"><label>THIS YEAR</label><div class="metric">${money(sum(yr))}</div><div class="sub">${rainy(yr).length} rainy days</div></div><div class="card"><label>LATEST OBSERVATION</label><div class="metric">${latest?money(latest.rainfall_mm):'—'}</div><div class="sub">${latest?latest.date:'No records'}</div></div></div>${rows.length?`<div class="grid"><div class="panel"><h2>Monthly rainfall in ${y}</h2>${chart(months,Array.from({length:12},(_,i)=>monthName(i)))}</div><div class="panel"><h2>Current month details</h2><div class="list"><div class="list-row"><span>Average per rainy day</span><b>${money(rainy(month).length?sum(month)/rainy(month).length:0)}</b></div><div class="list-row"><span>Wettest month</span><b>${months.some(Boolean)?monthName(months.indexOf(Math.max(...months))):'—'}</b></div><div class="list-row"><span>Records stored</span><b>${rows.length}</b></div></div></div></div><div class="grid"><div class="panel"><h2>Rainfall over the previous 12 months</h2>${chart(last12,Array.from({length:12},(_,i)=>{const d=new Date(y,m-11+i,1);return d.toLocaleString(undefined,{month:'short'})}))}</div><div class="panel"><h2>Yearly totals</h2>${chart(years.map(yr=>sum(rows.filter(r=>r.date.startsWith(yr+'-')))),years)}</div></div>`:empty()}`}
+function dashboard(){
+  const rows=read();
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=now.getMonth();
+  const todayKey=`${y}-${String(m+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+  const month=byMonth(rows,y)[m];
+  const yr=rows.filter(r=>r.date.startsWith(`${y}-`) && r.date<=todayKey);
+  const latest=rows[0];
+
+  const months=byMonth(rows,y).map(rs=>sum(rs.filter(r=>r.date<=todayKey)));
+  const ytd=sum(yr);
+
+  const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
+
+  const historicalYTD=years
+    .filter(year=>year!=='2010' && year!==String(y))
+    .map(year=>sum(rows.filter(r=>{
+      const d=r.date;
+      return d.startsWith(`${year}-`) &&
+        d.slice(5,10)<=todayKey.slice(5,10);
+    })));
+
+  const historicalAverageYTD=historicalYTD.length
+    ? historicalYTD.reduce((n,v)=>n+v,0)/historicalYTD.length
+    : 0;
+
+  const ytdDifference=ytd-historicalAverageYTD;
+
+  const ytdPercentage=historicalAverageYTD
+    ? (ytdDifference/historicalAverageYTD)*100
+    : 0;
+
+  const status=ytdPercentage<=-10
+    ? 'Below average'
+    : ytdPercentage>=10
+      ? 'Above average'
+      : 'Near average';
+
+  const statusClass=ytdPercentage<=-10
+    ? 'below'
+    : ytdPercentage>=10
+      ? 'above'
+      : 'near';
+
+  const last12=Array.from({length:12},(_,i)=>{
+    const d=new Date(y,m-11+i,1);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    return sum(rows.filter(r=>r.date.startsWith(key)));
+  });
+
+  const wettestDay=rows.reduce((best,r)=>{
+    return !best ||
+      Number(r.rainfall_mm)>Number(best.rainfall_mm)
+      ? r
+      : best;
+  },null);
+
+  return rows.length ? `
+
+    <section class="dashboard-hero">
+
+      <div class="hero-copy">
+        <p class="hero-eyebrow">RAINFALL AT A GLANCE</p>
+
+        <h2>${y} rainfall performance</h2>
+
+        <p class="hero-sub">
+          Rainfall recorded up to
+          ${now.toLocaleDateString(undefined,{
+            day:'numeric',
+            month:'long',
+            year:'numeric'
+          })}.
+        </p>
+      </div>
+
+      <div class="hero-main">
+
+        <div>
+          <span class="hero-label">${y} YTD</span>
+
+          <div class="hero-value">
+            ${money(ytd)}
+          </div>
+        </div>
+
+        <div class="hero-status ${statusClass}">
+          <strong>${status}</strong>
+
+          <span>
+            ${ytdDifference>=0?'+':''}${money(ytdDifference)}
+            vs historical average
+          </span>
+        </div>
+
+      </div>
+
+      <div class="hero-comparison">
+
+        <div class="comparison-head">
+
+          <span>
+            Progress against historical YTD average
+          </span>
+
+          <b>
+            ${
+              historicalAverageYTD
+              ? `${Math.abs(ytdPercentage).toFixed(1)}% ${
+                  ytdPercentage<0?'below':'above'
+                }`
+              : '—'
+            }
+          </b>
+
+        </div>
+
+        <div class="comparison-track">
+
+          <div
+            class="comparison-current"
+            style="width:${
+              historicalAverageYTD
+                ? Math.min((ytd/historicalAverageYTD)*100,100)
+                : 0
+            }%"
+          ></div>
+
+          <div class="comparison-average"></div>
+
+        </div>
+
+        <div class="comparison-labels">
+
+          <span>
+            ${y} YTD:
+            <b>${money(ytd)}</b>
+          </span>
+
+          <span>
+            Historical average:
+            <b>${money(historicalAverageYTD)}</b>
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="cards dashboard-kpis">
+
+      <div class="card">
+        <label>THIS MONTH</label>
+
+        <div class="metric">
+          ${money(sum(month))}
+        </div>
+
+        <div class="sub">
+          ${rainy(month).length} rainy days
+        </div>
+      </div>
+
+      <div class="card">
+        <label>RAINY DAYS YTD</label>
+
+        <div class="metric">
+          ${rainy(yr).length}
+        </div>
+
+        <div class="sub">
+          0.1 mm or more
+        </div>
+      </div>
+
+      <div class="card">
+        <label>WETTEST DAY</label>
+
+        <div class="metric">
+          ${wettestDay
+            ? money(wettestDay.rainfall_mm)
+            : '—'}
+        </div>
+
+        <div class="sub">
+          ${wettestDay
+            ? wettestDay.date
+            : 'No records'}
+        </div>
+      </div>
+
+      <div class="card">
+        <label>LATEST OBSERVATION</label>
+
+        <div class="metric">
+          ${latest
+            ? money(latest.rainfall_mm)
+            : '—'}
+        </div>
+
+        <div class="sub">
+          ${latest
+            ? latest.date
+            : 'No records'}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="grid">
+
+      <div class="panel">
+
+        <h2>Monthly rainfall in ${y}</h2>
+
+        ${chart(
+          months,
+          Array.from(
+            {length:12},
+            (_,i)=>monthName(i)
+          )
+        )}
+
+      </div>
+
+      <div class="panel">
+
+        <h2>Current month details</h2>
+
+        <div class="list">
+
+          <div class="list-row">
+            <span>Average per rainy day</span>
+
+            <b>
+              ${money(
+                rainy(month).length
+                  ? sum(month)/rainy(month).length
+                  : 0
+              )}
+            </b>
+          </div>
+
+          <div class="list-row">
+            <span>Wettest month</span>
+
+            <b>
+              ${
+                months.some(Boolean)
+                  ? monthName(
+                      months.indexOf(
+                        Math.max(...months)
+                      )
+                    )
+                  : '—'
+              }
+            </b>
+          </div>
+
+          <div class="list-row">
+            <span>Records stored</span>
+
+            <b>${rows.length}</b>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="grid">
+
+      <div class="panel">
+
+        <h2>Rainfall over the previous 12 months</h2>
+
+        ${chart(
+          last12,
+          Array.from(
+            {length:12},
+            (_,i)=>{
+              const d=new Date(
+                y,
+                m-11+i,
+                1
+              );
+
+              return d.toLocaleString(
+                undefined,
+                {month:'short'}
+              );
+            }
+          )
+        )}
+
+      </div>
+
+      <div class="panel">
+
+        <h2>Yearly totals</h2>
+
+        ${chart(
+          years.map(year=>
+            sum(
+              rows.filter(
+                r=>r.date.startsWith(`${year}-`)
+              )
+            )
+          ),
+          years
+        )}
+
+      </div>
+
+    </div>
+
+  ` : empty();
+}
 function record(){const r=editing||{date:new Date().toISOString().slice(0,10),rainfall_mm:'',notes:''};return `<div class="panel"><h2>${editing?'Edit rainfall record':'Record rainfall'}</h2><p class="sub">One quick record for your home rain gauge.</p><form class="form" id="record-form"><label class="field">Date<input required type="date" name="date" value="${r.date}"></label><label class="field">Rainfall (mm)<input required type="number" name="rainfall_mm" min="0" step="0.1" placeholder="0.0" value="${r.rainfall_mm}"></label><label class="field">Notes <span class="sub">(optional)</span><textarea name="notes" placeholder="e.g. overnight thunderstorm">${esc(r.notes)}</textarea></label><div><button class="primary">${editing?'Save changes':'Save rainfall'}</button> ${editing?'<button type="button" class="secondary" id="cancel-edit">Cancel</button>':''}</div></form></div>`}
 function filtered(){const f=$('#history-filters');let rows=read();if(!f)return rows;const x=Object.fromEntries(new FormData(f));return rows.filter(r=>(!x.search||`${r.date} ${r.notes}`.toLowerCase().includes(x.search.toLowerCase()))&&(!x.from||r.date>=x.from)&&(!x.to||r.date<=x.to)&&(!x.month||r.date.slice(5,7)===x.month)&&(!x.year||r.date.slice(0,4)===x.year));}
 function history(){
