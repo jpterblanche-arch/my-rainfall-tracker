@@ -233,7 +233,32 @@ function dashboard(){
   const ytd=sum(yr);
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
+const completeYears=years.filter(
+  year=>year!=='2010' && year!==String(y)
+);
 
+const annualTotals=completeYears.map(year=>({
+  year,
+  total:sum(
+    rows.filter(
+      r=>r.date.startsWith(`${year}-`)
+    )
+  )
+}));
+
+const wettestYear=annualTotals.length
+  ? annualTotals.reduce(
+      (best,current)=>
+        current.total>best.total ? current : best
+    )
+  : null;
+
+const driestYear=annualTotals.length
+  ? annualTotals.reduce(
+      (best,current)=>
+        current.total<best.total ? current : best
+    )
+  : null;
   const historicalYTD=years
     .filter(year=>year!=='2010' && year!==String(y))
     .map(year=>sum(rows.filter(r=>{
