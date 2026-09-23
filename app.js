@@ -200,7 +200,7 @@ function chart(values, labels, detailed=false, highlights={}){
    return `<div class="chart">${values.map((v,i)=>`<div class="bar ${highlights[labels[i]]||''}" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
   }
 
- return `<div class="chart">${values.map((v,i)=>`<div class="bar ${highlights[labels[i]]||''}" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
+ return `<div class="chart">${values.map((v,i)=>`<div class="bar ${highlights[labels[i]]||''}" style="height:${Math.max(v?6:1,v/max*100)}%;${highlights[labels[i]]==='wettest-bar'?'background:linear-gradient(#4caf50,#2e8b36);':highlights[labels[i]]==='driest-bar'?'background:linear-gradient(#ef5350,#d32f2f);':''}" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
 }
 function empty(t='No rainfall records yet. Record rainfall or import a CSV file to begin.'){return `<div class="empty">${t}</div>`}
 function dashboard(){
