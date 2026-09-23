@@ -193,26 +193,11 @@ function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-l
 function go(p){page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
-function chart(values, labels, detailed=false){
+function chart(values, labels, detailed=false, highlights={}){
   const max=Math.max(...values,1);
 
   if(detailed){
-    return `<div class="chart chart-detailed">
-      ${values.map((v,i)=>`
-        <div class="bar-wrap">
-          <div class="bar-value">${Number(v).toFixed(1)}</div>
-          <div class="bar-area">
-            <div
-              class="bar"
-              style="height:${Math.max(v?6:1,v/max*100)}%"
-              data-tip="${labels[i]}: ${money(v)}"
-              tabindex="0">
-            </div>
-          </div>
-          <div class="bar-label">${labels[i]}</div>
-        </div>
-      `).join('')}
-    </div>`;
+   return `<div class="chart">${values.map((v,i)=>`<div class="bar ${highlights[labels[i]]||''}" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
   }
 
   return `<div class="chart">${values.map((v,i)=>`<div class="bar" style="height:${Math.max(v?6:1,v/max*100)}%" data-tip="${labels[i]}: ${money(v)}" tabindex="0"></div>`).join('')}</div><div class="sub" style="display:flex;justify-content:space-between;margin-top:8px"><span>${labels[0]||''}</span><span>${labels.at(-1)||''}</span></div>`;
@@ -567,7 +552,12 @@ const driestYear=annualTotals.length
       )
     )
   ),
-  years
+  years,
+  false,
+  {
+    [wettestYear.year]:'wettest-bar',
+    [driestYear.year]:'driest-bar'
+  }
 )}
 
 <div class="list" style="margin-top:16px;">
