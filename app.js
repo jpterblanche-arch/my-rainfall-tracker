@@ -545,50 +545,6 @@ function dashboard(){
     years
   )}
 
-  <div class="list" style="margin-top:16px;">
-
-    <div class="list-row">
-      <span>Wettest year</span>
-      <b>
-        ${
-          years.length
-            ? years[
-                years.reduce(
-                  (best,i)=>
-                    sum(rows.filter(r=>r.date.startsWith(`${i}-`))) >
-                    sum(rows.filter(r=>r.date.startsWith(`${best}-`)))
-                      ? years.indexOf(i)
-                      : best,
-                  0
-                )
-              ]
-            : '—'
-        }
-      </b>
-    </div>
-
-    <div class="list-row">
-      <span>Driest year</span>
-      <b>
-        ${
-          years.length
-            ? years[
-                years.reduce(
-                  (best,i)=>
-                    sum(rows.filter(r=>r.date.startsWith(`${i}-`))) <
-                    sum(rows.filter(r=>r.date.startsWith(`${best}-`)))
-                      ? years.indexOf(i)
-                      : best,
-                  0
-                )
-              ]
-            : '—'
-        }
-      </b>
-    </div>
-
-  </div>
-
 </div>
 
     </div>
