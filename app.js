@@ -532,20 +532,64 @@ function dashboard(){
 
       <div class="panel">
 
-        <h2>Yearly totals</h2>
+  <h2>Yearly totals</h2>
 
-        ${chart(
-          years.map(year=>
-            sum(
-              rows.filter(
-                r=>r.date.startsWith(`${year}-`)
-              )
-            )
-          ),
-          years
-        )}
+  ${chart(
+    years.map(year=>
+      sum(
+        rows.filter(
+          r=>r.date.startsWith(`${year}-`)
+        )
+      )
+    ),
+    years
+  )}
 
-      </div>
+  <div class="list" style="margin-top:16px;">
+
+    <div class="list-row">
+      <span>Wettest year</span>
+      <b>
+        ${
+          years.length
+            ? years[
+                years.reduce(
+                  (best,i)=>
+                    sum(rows.filter(r=>r.date.startsWith(`${i}-`))) >
+                    sum(rows.filter(r=>r.date.startsWith(`${best}-`)))
+                      ? years.indexOf(i)
+                      : best,
+                  0
+                )
+              ]
+            : '—'
+        }
+      </b>
+    </div>
+
+    <div class="list-row">
+      <span>Driest year</span>
+      <b>
+        ${
+          years.length
+            ? years[
+                years.reduce(
+                  (best,i)=>
+                    sum(rows.filter(r=>r.date.startsWith(`${i}-`))) <
+                    sum(rows.filter(r=>r.date.startsWith(`${best}-`)))
+                      ? years.indexOf(i)
+                      : best,
+                  0
+                )
+              ]
+            : '—'
+        }
+      </b>
+    </div>
+
+  </div>
+
+</div>
 
     </div>
 
