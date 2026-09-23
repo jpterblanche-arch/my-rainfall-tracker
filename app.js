@@ -253,65 +253,7 @@ function dashboard(){
       ? r
       : best;
   },null);
-    const monthBenchmarks=Array.from({length:12},(_,monthIndex)=>{
-
-    const monthNumber=String(monthIndex+1).padStart(2,'0');
-
-    const historicalYears=years.filter(
-      year=>year!=='2010' && year!==String(y)
-    );
-
-    const historicalTotals=historicalYears.map(year=>{
-
-      const records=rows.filter(r=>{
-
-        if(!r.date.startsWith(`${year}-${monthNumber}-`))
-          return false;
-
-        // For the current month, compare up to today's day.
-        if(monthIndex===m){
-          return Number(r.date.slice(8,10))<=now.getDate();
-        }
-
-        return true;
-      });
-
-      return sum(records);
-    });
-
-    const historicalAverage=historicalTotals.length
-      ? historicalTotals.reduce((n,v)=>n+v,0)/historicalTotals.length
-      : 0;
-
-    const currentRecords=rows.filter(r=>{
-
-      if(!r.date.startsWith(`${y}-${monthNumber}-`))
-        return false;
-
-      if(monthIndex===m){
-        return Number(r.date.slice(8,10))<=now.getDate();
-      }
-
-      return true;
-    });
-
-    const currentTotal=sum(currentRecords);
-
-    const difference=currentTotal-historicalAverage;
-
-    const percentage=historicalAverage
-      ? (difference/historicalAverage)*100
-      : 0;
-
-    return {
-      month:monthName(monthIndex),
-      current:currentTotal,
-      average:historicalAverage,
-      difference,
-      percentage,
-      currentMonth:monthIndex===m
-    };
-  });
+    
 
   return rows.length ? `
 
