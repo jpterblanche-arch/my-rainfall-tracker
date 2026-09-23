@@ -559,16 +559,30 @@ const driestYear=annualTotals.length
 
   <h2>Yearly totals</h2>
 
-  ${chart(
-    years.map(year=>
-      sum(
-        rows.filter(
-          r=>r.date.startsWith(`${year}-`)
-        )
+ ${chart(
+  years.map(year=>
+    sum(
+      rows.filter(
+        r=>r.date.startsWith(`${year}-`)
       )
-    ),
-    years
-  )}
+    )
+  ),
+  years
+)}
+
+<div class="list" style="margin-top:16px;">
+
+  <div class="list-row">
+    <span>Wettest year</span>
+    <b>${wettestYear ? wettestYear.year : '—'}</b>
+  </div>
+
+  <div class="list-row">
+    <span>Driest year</span>
+    <b>${driestYear ? driestYear.year : '—'}</b>
+  </div>
+
+</div>
 
 </div>
 
