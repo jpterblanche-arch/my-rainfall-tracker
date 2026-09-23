@@ -253,6 +253,65 @@ function dashboard(){
       ? r
       : best;
   },null);
+    const monthBenchmarks=Array.from({length:12},(_,monthIndex)=>{
+
+    const monthNumber=String(monthIndex+1).padStart(2,'0');
+
+    const historicalYears=years.filter(
+      year=>year!=='2010' && year!==String(y)
+    );
+
+    const historicalTotals=historicalYears.map(year=>{
+
+      const records=rows.filter(r=>{
+
+        if(!r.date.startsWith(`${year}-${monthNumber}-`))
+          return false;
+
+        // For the current month, compare up to today's day.
+        if(monthIndex===m){
+          return Number(r.date.slice(8,10))<=now.getDate();
+        }
+
+        return true;
+      });
+
+      return sum(records);
+    });
+
+    const historicalAverage=historicalTotals.length
+      ? historicalTotals.reduce((n,v)=>n+v,0)/historicalTotals.length
+      : 0;
+
+    const currentRecords=rows.filter(r=>{
+
+      if(!r.date.startsWith(`${y}-${monthNumber}-`))
+        return false;
+
+      if(monthIndex===m){
+        return Number(r.date.slice(8,10))<=now.getDate();
+      }
+
+      return true;
+    });
+
+    const currentTotal=sum(currentRecords);
+
+    const difference=currentTotal-historicalAverage;
+
+    const percentage=historicalAverage
+      ? (difference/historicalAverage)*100
+      : 0;
+
+    return {
+      month:monthName(monthIndex),
+      current:currentTotal,
+      average:historicalAverage,
+      difference,
+      percentage,
+      currentMonth:monthIndex===m
+    };
+  });
 
   return rows.length ? `
 
@@ -404,7 +463,92 @@ function dashboard(){
       </div>
 
     </div>
+    <div class="panel monthly-benchmark-panel">
 
+      <div class="toolbar">
+
+        <div>
+          <h2>2026 monthly performance</h2>
+
+          <p class="sub">
+            Monthly rainfall compared with the historical average.
+            The current month is measured to the same date.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="monthly-benchmark">
+
+        ${monthBenchmarks.map(item=>`
+
+          <div class="benchmark-row ${item.currentMonth?'current-month':''}">
+
+            <div class="benchmark-month">
+              <b>${item.month}</b>
+              ${item.currentMonth
+                ? '<span>Current</span>'
+                : ''}
+            </div>
+
+            <div class="benchmark-bars">
+
+              <div class="benchmark-line">
+                <span class="benchmark-label">
+                  2026
+                </span>
+
+                <div class="benchmark-track">
+                  <div
+                    class="benchmark-current"
+                    style="width:${
+                      item.average
+                        ? Math.min(
+                            (item.current/item.average)*100,
+                            100
+                          )
+                        : 0
+                    }%"
+                  ></div>
+                </div>
+
+                <b>${money(item.current)}</b>
+              </div>
+
+              <div class="benchmark-line">
+                <span class="benchmark-label">
+                  Average
+                </span>
+
+                <div class="benchmark-track average-track">
+                  <div
+                    class="benchmark-average-bar"
+                    style="width:100%"
+                  ></div>
+                </div>
+
+                <b>${money(item.average)}</b>
+              </div>
+
+            </div>
+
+            <div class="benchmark-result ${
+              item.percentage<0 ? 'negative' : 'positive'
+            }">
+
+              ${item.average
+                ? `${item.percentage>=0?'+':''}${item.percentage.toFixed(1)}%`
+                : '—'}
+
+            </div>
+
+          </div>
+
+        `).join('')}
+
+      </div>
+
+    </div>
     <div class="grid">
 
       <div class="panel">
