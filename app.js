@@ -1270,3 +1270,69 @@ async function completeImport(text){
 });
 
 startApp();
+// iPhone Shortcut API
+if (new URLSearchParams(window.location.search).get('shortcut') === 'rainfall') {
+  (async () => {
+    try {
+      const rows = await loadPublicFromSupabase();
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = today.getMonth();
+      const todayKey = `${y}-${String(m + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      const latest = rows[0];
+
+      const monthRows = rows.filter(r =>
+        r.date.startsWith(`${y}-${String(m + 1).padStart(2, '0')}-`)
+      );
+
+      const ytdRows = rows.filter(r =>
+        r.date.startsWith(`${y}-`) && r.date <= todayKey
+      );
+
+      const ytd = ytdRows.reduce((n, r) => n + Number(r.rainfall_mm), 0);
+
+      const historicalYears = [...new Set(rows.map(r => r.date.slice(0, 4)))]
+        .filter(year => year !== '2010' && year !== String(y));
+
+      const historicalYTD = historicalYears.map(year =>
+        rows
+          .filter(r =>
+            r.date.startsWith(`${year}-`) &&
+            r.date.slice(5, 10) <= todayKey.slice(5, 10)
+          )
+          .reduce((n, r) => n + Number(r.rainfall_mm), 0)
+      );
+
+      const historicalAverage = historicalYTD.length
+        ? historicalYTD.reduce((n, v) => n + v, 0) / historicalYTD.length
+        : 0;
+
+      const difference = ytd - historicalAverage;
+      const percentage = historicalAverage
+        ? (difference / historicalAverage) * 100
+        : 0;
+
+      const monthTotal = monthRows.reduce(
+        (n, r) => n + Number(r.rainfall_mm), 0
+      );
+
+      const result = {
+        latest_date: latest?.date || '',
+        latest_rainfall_mm: Number(latest?.rainfall_mm || 0),
+        current_month_mm: Number(monthTotal.toFixed(1)),
+        ytd_mm: Number(ytd.toFixed(1)),
+        historical_average_ytd_mm: Number(historicalAverage.toFixed(1)),
+        difference_mm: Number(difference.toFixed(1)),
+        percentage_difference: Number(percentage.toFixed(1))
+      };
+
+      document.body.innerHTML =
+        `<pre style="font-family:system-ui;font-size:18px;padding:20px">${JSON.stringify(result)}</pre>`;
+
+    } catch (error) {
+      document.body.innerHTML =
+        `<pre>${JSON.stringify({error: error.message})}</pre>`;
+    }
+  })();
+}
