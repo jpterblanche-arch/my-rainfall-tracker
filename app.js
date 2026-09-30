@@ -345,13 +345,13 @@ const driestYear=annualTotals.length
 
     <div class="hero-comparison">
 
-  <div class="comparison-head">
+    <div class="comparison-head">
 
-    <span>
-      ${y} YTD compared with historical average
+    <span style="font-size:15px;font-weight:600;">
+      ${y} YTD (${money(ytd)}) compared with historical average
     </span>
 
-    <b>
+    <b style="font-size:15px;">
       ${
         historicalAverageYTD
         ? `${Math.abs(ytdPercentage).toFixed(1)}% ${
@@ -376,20 +376,7 @@ const driestYear=annualTotals.length
 
 </div>
 
-  <div class="comparison-labels">
-
-    <span>
-      ${y} YTD
-      <b>${money(ytd)}</b>
-    </span>
-
-    <span>
-      Historical average
-      <b>${money(historicalAverageYTD)}</b>
-    </span>
-
-  </div>
-
+  
 </div>
 
     </section>
