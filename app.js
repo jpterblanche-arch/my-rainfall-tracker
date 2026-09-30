@@ -682,7 +682,7 @@ function snapshot(){
   const now=new Date();
   const currentYear=String(now.getFullYear());
   const todayKey=`${currentYear}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-
+ const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort().reverse();
  const y=years.includes(currentYear) ? currentYear : years[0];
 
   const yearRows=rows.filter(r=>r.date.startsWith(`${y}-`));
