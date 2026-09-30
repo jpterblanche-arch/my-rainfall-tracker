@@ -746,128 +746,71 @@ function snapshot(){
   );
 
   return `
-    <div class="panel">
+    <div class="panel" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#eaf7ff 0%,#ffffff 55%,#eef8f0 100%);">
 
-      <div class="toolbar">
-        <div>
-          <h2>Rainfall Snapshot</h2>
-          <p class="sub">
-            A visual overview of the key rainfall highlights for ${y}.
-          </p>
-        </div>
+      <div style="padding:30px 32px 26px;">
 
-        <select id="snapshot-year">
-          ${years.map(year=>
-            `<option value="${year}" ${year===y?'selected':''}>${year}</option>`
-          ).join('')}
-        </select>
-      </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
 
-      <div id="snapshot-content">
+          <div>
+            <div style="font-size:13px;font-weight:800;letter-spacing:.12em;margin-bottom:8px;">
+              🌧️ RAINFALL SNAPSHOT
+            </div>
 
-        <div class="cards">
+            <h2 style="font-size:30px;margin:0 0 6px;">
+              ${y}
+            </h2>
 
-          <div class="card">
-            <label>${y} RAINFALL</label>
-            <div class="metric">${money(ytd)}</div>
-            <div class="sub">
+            <p class="sub" style="font-size:15px;margin:0;">
               ${isCurrentYear
-                ? `Recorded up to ${new Date(`${todayKey}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}`
-                : 'Full year'}
-            </div>
+                ? `Rainfall recorded up to ${new Date(`${todayKey}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}`
+                : 'Full year rainfall'}
+            </p>
           </div>
 
-          <div class="card">
-            <label>HISTORICAL AVERAGE</label>
-            <div class="metric">${money(historicalAverage)}</div>
-            <div class="sub">Comparable period</div>
-          </div>
-
-          <div class="card">
-            <label>RAINY DAYS</label>
-            <div class="metric">${rainyDays}</div>
-            <div class="sub">Days with ≥ 0,1 mm</div>
-          </div>
-
-          <div class="card">
-            <label>MAXIMUM DAILY RAINFALL</label>
-            <div class="metric">${maxDaily ? money(maxDaily.rainfall_mm) : '—'}</div>
-            <div class="sub">
-              ${maxDaily
-                ? new Date(`${maxDaily.date}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})
-                : '—'}
-            </div>
-          </div>
+          <select id="snapshot-year"
+            style="font-size:16px;padding:9px 14px;border-radius:10px;">
+            ${years.map(year=>
+              `<option value="${year}" ${year===y?'selected':''}>${year}</option>`
+            ).join('')}
+          </select>
 
         </div>
 
-        <div class="grid">
+        <div style="margin-top:28px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:28px;align-items:center;">
 
-          <div class="panel">
-            <h2>How ${y} is tracking</h2>
+          <div>
+            <div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
+              Total rainfall
+            </div>
 
-            <div class="list">
+            <div style="font-size:64px;line-height:1;font-weight:800;letter-spacing:-.04em;margin:8px 0;">
+              ${money(ytd)}
+            </div>
 
-              <div class="list-row">
-                <span>Rainfall</span>
-                <b>${money(ytd)}</b>
-              </div>
+            <div style="font-size:18px;font-weight:700;">
+              ${Math.abs(percentage).toFixed(1)}% ${percentage<0?'below':'above'} the historical average
+            </div>
 
-              <div class="list-row">
-                <span>Historical average</span>
-                <b>${money(historicalAverage)}</b>
-              </div>
-
-              <div class="list-row">
-                <span>Difference</span>
-                <b>${difference>=0?'+':''}${money(difference)}</b>
-              </div>
-
-              <div class="list-row">
-                <span>Percentage</span>
-                <b>${Math.abs(percentage).toFixed(1)}% ${percentage<0?'below':'above'}</b>
-              </div>
-
+            <div style="font-size:14px;margin-top:6px;opacity:.75;">
+              ${difference>=0?'+':''}${money(difference)} compared with ${money(historicalAverage)}
             </div>
           </div>
 
-          <div class="panel">
-            <h2>Monthly rainfall</h2>
+          <div style="background:rgba(255,255,255,.72);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
 
-            ${chart(
-              months,
-              Array.from({length:12},(_,i)=>monthName(i))
-            )}
-
-          </div>
-
-        </div>
-
-        <div class="panel">
-          <h2>Key rainfall highlights</h2>
-
-          <div class="cards">
-
-            <div class="card">
-              <label>WETTEST MONTH</label>
-              <div class="metric">${monthName(months.indexOf(wettestMonth))}</div>
-              <div class="sub">${money(wettestMonth)}</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:9px;">
+              <span>${y} YTD</span>
+              <span>Historical average</span>
             </div>
 
-            <div class="card">
-              <label>DRIEST MONTH</label>
-              <div class="metric">${monthName(months.indexOf(driestMonth))}</div>
-              <div class="sub">${money(driestMonth)}</div>
+            <div style="height:18px;background:#dfeaf0;border-radius:999px;overflow:hidden;">
+              <div style="height:100%;width:${historicalAverage ? Math.min((ytd/historicalAverage)*100,100) : 0}%;background:linear-gradient(90deg,#42a5f5,#1976d2);border-radius:999px;"></div>
             </div>
 
-            <div class="card">
-              <label>BOLD STATEMENT</label>
-              <div class="metric" style="font-size:22px;">
-                ${Math.abs(difference).toFixed(1).replace('.',',')} mm
-              </div>
-              <div class="sub">
-                ${percentage<0?'below':'above'} historical average
-              </div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:14px;">
+              <b>${money(ytd)}</b>
+              <b>${money(historicalAverage)}</b>
             </div>
 
           </div>
@@ -875,9 +818,9 @@ function snapshot(){
         </div>
 
       </div>
+
     </div>
   `;
-}
 function yearly(){const rows=read(), years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();if(!years.length)return empty();const metrics=years.map(y=>{const rs=rows.filter(r=>r.date.startsWith(y+'-')), ms=byMonth(rows,y).map(sum), max=Math.max(...ms);return [y,rs,ms,max]});return `<div class="panel"><h2>Yearly rainfall</h2>${chart(metrics.map(x=>sum(x[1])),years)}<div class="wide"><table class="stat-table"><thead><tr><th>Year</th><th>Annual rainfall</th><th>Rainy days</th><th>Wettest month</th><th>Maximum daily rainfall</th></tr></thead><tbody>${metrics.map(([y,rs,ms,max])=>`<tr><td>${y}</td><td>${money(sum(rs))}</td><td>${rainy(rs).length}</td><td>${monthName(ms.indexOf(max))}</td><td>${money(Math.max(0,...rs.map(r=>r.rainfall_mm)))}</td></tr>`).join('')}</tbody></table></div></div>`}
 function compare(){const years=[...new Set(read().map(r=>r.date.slice(0,4)))].sort().reverse();if(years.length<2)return empty('At least two years of rainfall data are needed for a comparison.');return `<div class="panel"><div class="toolbar"><h2>Compare years</h2><div><select id="year-a">${years.map(y=>`<option>${y}</option>`)}</select> <select id="year-b">${years.map((y,i)=>`<option ${i===1?'selected':''}>${y}</option>`)}</select></div></div><div id="comparison"></div></div>`}
 function drawCompare(){const a=$('#year-a').value,b=$('#year-b').value,rows=read(),ar=rows.filter(r=>r.date.startsWith(a+'-')),br=rows.filter(r=>r.date.startsWith(b+'-')),av=byMonth(rows,a).map(sum),bv=byMonth(rows,b).map(sum),at=sum(ar),bt=sum(br),diff=at-bt,pct=bt?diff/bt*100:null;$('#comparison').innerHTML=`<div class="cards"><div class="card"><label>${a} TOTAL</label><div class="metric">${money(at)}</div></div><div class="card"><label>${b} TOTAL</label><div class="metric">${money(bt)}</div></div><div class="card"><label>DIFFERENCE</label><div class="metric">${money(diff)}</div><div class="sub">${pct===null?'Percentage unavailable (comparison is zero)':pct.toFixed(1)+'%'}</div></div><div class="card"><label>RAINY DAYS</label><div class="metric">${rainy(ar).length} / ${rainy(br).length}</div><div class="sub">${a} / ${b}</div></div></div><div class="grid"><div class="panel"><h2>Monthly comparison</h2>${chart(av.map((x,i)=>Math.max(x,bv[i])),Array.from({length:12},(_,i)=>monthName(i)))}</div><div class="panel"><h2>Key comparison</h2><div class="list"><div class="list-row"><span>Wettest month</span><b>${monthName(av.indexOf(Math.max(...av)))} / ${monthName(bv.indexOf(Math.max(...bv)))}</b></div><div class="list-row"><span>Max daily rainfall</span><b>${money(Math.max(0,...ar.map(r=>r.rainfall_mm)))} / ${money(Math.max(0,...br.map(r=>r.rainfall_mm)))}</b></div></div></div></div><div class="sub">The chart shows the higher of each pair of monthly totals. Detailed values appear below.</div><div class="wide"><table class="stat-table"><thead><tr><th>Month</th><th>${a}</th><th>${b}</th><th>Difference</th></tr></thead><tbody>${av.map((x,i)=>`<tr><td>${monthName(i)}</td><td>${money(x)}</td><td>${money(bv[i])}</td><td>${money(x-bv[i])}</td></tr>`).join('')}</tbody></table></div>`}
