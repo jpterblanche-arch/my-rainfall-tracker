@@ -201,7 +201,7 @@ function chart(values, labels, detailed=false, highlights={}){
     ${values.map((v,i)=>`
       <div class="bar-wrap">
         <div class="bar-value">${Number(v).toFixed(1)}</div>
-        <div class="bar-area">
+        <div class="bar-area" style="height:220px;">
           <div
             class="bar"
             style="height:${Math.max(v?6:1,v/max*100)}%"
