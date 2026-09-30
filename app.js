@@ -332,9 +332,9 @@ const driestYear=annualTotals.length
           </div>
         </div>
 
-        <div class="hero-status ${statusClass}">
-         <strong style="font-size:16px;">${status}</strong>
-         <span style="font-size:13px;">
+        <div class="hero-status ${statusClass}" style="padding:14px 18px;">
+         <strong style="font-size:18px;">${status}</strong>
+        <span style="font-size:14px;">
   ${ytdDifference>=0?'+':''}${money(ytdDifference)}
   vs historical average
 </span>
@@ -350,7 +350,7 @@ const driestYear=annualTotals.length
       ${y} YTD (${money(ytd)}) compared with historical average
     </span>
 
-    <b style="font-size:15px;">
+    <b style="font-size:16px;">
       ${
         historicalAverageYTD
         ? `${Math.abs(ytdPercentage).toFixed(1)}% ${
