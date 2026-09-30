@@ -855,7 +855,7 @@ function snapshot(){
           <div style="font-size:11px;font-weight:900;letter-spacing:.1em;margin-top:9px;">
             WETTEST MONTH
           </div>
-          <div style="font-size:30px;font-weight:900;margin-top:3px;">
+                    <div style="font-size:30px;font-weight:900;margin-top:3px;">
             ${monthName(months.indexOf(wettestMonth))}
           </div>
           <div style="font-size:12px;opacity:.65;margin-top:4px;">
@@ -865,6 +865,15 @@ function snapshot(){
 
       </div>
 
+      <div style="margin-top:22px;padding:18px 22px;background:rgba(255,255,255,.55);border-left:5px solid #42a5f5;border-radius:14px;font-size:16px;line-height:1.5;">
+        <b>${monthName(months.indexOf(wettestMonth))}</b> was the wettest month with
+        <b>${money(wettestMonth)}</b> of rainfall.
+        The maximum daily rainfall was
+        <b>${maxDaily ? money(maxDaily.rainfall_mm) : '—'}</b>
+        ${maxDaily
+          ? `on ${new Date(`${maxDaily.date}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}.`
+          : '.'}
+      </div>
 
       <div style="margin-top:30px;background:rgba(255,255,255,.78);border-radius:22px;padding:24px 24px 26px;box-shadow:0 8px 26px rgba(0,0,0,.05);">
 
