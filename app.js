@@ -817,7 +817,49 @@ function snapshot(){
           </div>
 
         </div>
+        <div style="margin-top:28px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;">
 
+          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
+            <div style="font-size:24px;">🌧️</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
+              RAINY DAYS
+            </div>
+            <div style="font-size:30px;font-weight:800;margin-top:4px;">
+              ${rainyDays}
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
+            <div style="font-size:24px;">💧</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
+              MAX DAILY RAINFALL
+            </div>
+            <div style="font-size:30px;font-weight:800;margin-top:4px;">
+              ${maxDaily ? money(maxDaily.rainfall_mm) : '—'}
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
+            <div style="font-size:24px;">📅</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
+              WETTEST MONTH
+            </div>
+            <div style="font-size:24px;font-weight:800;margin-top:4px;">
+              ${monthName(months.indexOf(wettestMonth))}
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
+            <div style="font-size:24px;">📊</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
+              DIFFERENCE
+            </div>
+            <div style="font-size:30px;font-weight:800;margin-top:4px;">
+              ${difference>=0?'+':''}${money(difference)}
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
