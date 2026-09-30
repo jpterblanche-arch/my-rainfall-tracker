@@ -849,7 +849,7 @@ function snapshot(){
             </div>
           </div>
 
-          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
+                    <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
             <div style="font-size:24px;">📊</div>
             <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
               DIFFERENCE
@@ -858,6 +858,31 @@ function snapshot(){
               ${difference>=0?'+':''}${money(difference)}
             </div>
           </div>
+
+        </div>
+
+        <div style="margin-top:28px;background:rgba(255,255,255,.72);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.05);">
+
+          <div style="display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:14px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:13px;font-weight:800;letter-spacing:.08em;">
+                MONTHLY RAINFALL
+              </div>
+              <div style="font-size:14px;opacity:.7;margin-top:4px;">
+                ${y} rainfall by month
+              </div>
+            </div>
+
+            <div style="font-size:13px;font-weight:700;">
+              Total: ${money(ytd)}
+            </div>
+          </div>
+
+          ${chart(
+            months,
+            ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            true
+          )}
 
         </div>
       </div>
