@@ -746,149 +746,158 @@ function snapshot(){
     null
   );
 
-  return `
-    <div class="panel" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#eaf7ff 0%,#ffffff 55%,#eef8f0 100%);">
+ return `
+  <div class="panel" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#eaf7ff 0%,#ffffff 48%,#eef8f0 100%);">
 
-      <div style="padding:30px 32px 26px;">
+    <div style="padding:34px 36px 30px;">
 
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+
+        <div>
+          <div style="font-size:12px;font-weight:900;letter-spacing:.16em;margin-bottom:7px;">
+            🌧️ RAINFALL SNAPSHOT
+          </div>
+
+          <div style="font-size:36px;font-weight:800;line-height:1;">
+            ${y}
+          </div>
+
+          <div style="font-size:14px;opacity:.65;margin-top:8px;">
+            ${isCurrentYear
+              ? `Rainfall recorded up to ${new Date(`${todayKey}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}`
+              : 'Full year rainfall'}
+          </div>
+        </div>
+
+        <select id="snapshot-year"
+          style="font-size:16px;padding:10px 14px;border-radius:10px;">
+          ${years.map(year=>
+            `<option value="${year}" ${year===y?'selected':''}>${year}</option>`
+          ).join('')}
+        </select>
+
+      </div>
+
+
+      <div style="margin-top:34px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);gap:34px;align-items:center;">
+
+        <div>
+
+          <div style="font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.7;">
+            Rainfall recorded
+          </div>
+
+          <div style="font-size:76px;line-height:.95;font-weight:900;letter-spacing:-.055em;margin:8px 0 12px;">
+            ${money(ytd)}
+          </div>
+
+          <div style="font-size:21px;font-weight:800;">
+            ${Math.abs(percentage).toFixed(1)}% ${percentage<0?'below':'above'} historical average
+          </div>
+
+          <div style="font-size:15px;margin-top:7px;opacity:.65;">
+            ${difference>=0?'+':''}${money(difference)} compared with ${money(historicalAverage)}
+          </div>
+
+        </div>
+
+
+        <div style="background:rgba(255,255,255,.82);border-radius:22px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.07);">
+
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:10px;">
+            <span>${y} YTD</span>
+            <span>Historical average</span>
+          </div>
+
+          <div style="height:22px;background:#dfeaf0;border-radius:999px;overflow:hidden;">
+            <div style="height:100%;width:${historicalAverage ? Math.min((ytd/historicalAverage)*100,100) : 0}%;background:linear-gradient(90deg,#42a5f5,#1976d2);border-radius:999px;"></div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:11px;font-size:15px;">
+            <b>${money(ytd)}</b>
+            <b>${money(historicalAverage)}</b>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div style="margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+
+        <div style="background:rgba(255,255,255,.72);border-radius:18px;padding:20px;">
+          <div style="font-size:26px;">🌧️</div>
+          <div style="font-size:11px;font-weight:900;letter-spacing:.1em;margin-top:9px;">
+            RAINY DAYS
+          </div>
+          <div style="font-size:34px;font-weight:900;margin-top:3px;">
+            ${rainyDays}
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,.72);border-radius:18px;padding:20px;">
+          <div style="font-size:26px;">💧</div>
+          <div style="font-size:11px;font-weight:900;letter-spacing:.1em;margin-top:9px;">
+            MAX DAILY RAINFALL
+          </div>
+          <div style="font-size:34px;font-weight:900;margin-top:3px;">
+            ${maxDaily ? money(maxDaily.rainfall_mm) : '—'}
+          </div>
+          <div style="font-size:12px;opacity:.65;margin-top:4px;">
+            ${maxDaily
+              ? new Date(`${maxDaily.date}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})
+              : '—'}
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,.72);border-radius:18px;padding:20px;">
+          <div style="font-size:26px;">📅</div>
+          <div style="font-size:11px;font-weight:900;letter-spacing:.1em;margin-top:9px;">
+            WETTEST MONTH
+          </div>
+          <div style="font-size:30px;font-weight:900;margin-top:3px;">
+            ${monthName(months.indexOf(wettestMonth))}
+          </div>
+          <div style="font-size:12px;opacity:.65;margin-top:4px;">
+            ${money(wettestMonth)} rainfall
+          </div>
+        </div>
+
+      </div>
+
+
+      <div style="margin-top:30px;background:rgba(255,255,255,.78);border-radius:22px;padding:24px 24px 26px;box-shadow:0 8px 26px rgba(0,0,0,.05);">
+
+        <div style="display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:15px;flex-wrap:wrap;">
 
           <div>
-            <div style="font-size:13px;font-weight:800;letter-spacing:.12em;margin-bottom:8px;">
-              🌧️ RAINFALL SNAPSHOT
+            <div style="font-size:13px;font-weight:900;letter-spacing:.1em;">
+              MONTHLY RAINFALL
             </div>
 
-            <h2 style="font-size:30px;margin:0 0 6px;">
-              ${y}
-            </h2>
-
-            <p class="sub" style="font-size:15px;margin:0;">
-              ${isCurrentYear
-                ? `Rainfall recorded up to ${new Date(`${todayKey}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}`
-                : 'Full year rainfall'}
-            </p>
-          </div>
-
-          <select id="snapshot-year"
-            style="font-size:16px;padding:9px 14px;border-radius:10px;">
-            ${years.map(year=>
-              `<option value="${year}" ${year===y?'selected':''}>${year}</option>`
-            ).join('')}
-          </select>
-
-        </div>
-
-        <div style="margin-top:28px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:28px;align-items:center;">
-
-          <div>
-            <div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
-              Total rainfall
-            </div>
-
-            <div style="font-size:64px;line-height:1;font-weight:800;letter-spacing:-.04em;margin:8px 0;">
-              ${money(ytd)}
-            </div>
-
-            <div style="font-size:18px;font-weight:700;">
-              ${Math.abs(percentage).toFixed(1)}% ${percentage<0?'below':'above'} the historical average
-            </div>
-
-            <div style="font-size:14px;margin-top:6px;opacity:.75;">
-              ${difference>=0?'+':''}${money(difference)} compared with ${money(historicalAverage)}
+            <div style="font-size:14px;opacity:.65;margin-top:4px;">
+              ${y} rainfall by month
             </div>
           </div>
 
-          <div style="background:rgba(255,255,255,.72);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
-
-            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:9px;">
-              <span>${y} YTD</span>
-              <span>Historical average</span>
-            </div>
-
-            <div style="height:18px;background:#dfeaf0;border-radius:999px;overflow:hidden;">
-              <div style="height:100%;width:${historicalAverage ? Math.min((ytd/historicalAverage)*100,100) : 0}%;background:linear-gradient(90deg,#42a5f5,#1976d2);border-radius:999px;"></div>
-            </div>
-
-            <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:14px;">
-              <b>${money(ytd)}</b>
-              <b>${money(historicalAverage)}</b>
-            </div>
-
-          </div>
-
-        </div>
-        <div style="margin-top:28px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;">
-
-          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
-            <div style="font-size:24px;">🌧️</div>
-            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
-              RAINY DAYS
-            </div>
-            <div style="font-size:30px;font-weight:800;margin-top:4px;">
-              ${rainyDays}
-            </div>
-          </div>
-
-          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
-            <div style="font-size:24px;">💧</div>
-            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
-              MAX DAILY RAINFALL
-            </div>
-            <div style="font-size:30px;font-weight:800;margin-top:4px;">
-              ${maxDaily ? money(maxDaily.rainfall_mm) : '—'}
-            </div>
-          </div>
-
-          <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
-            <div style="font-size:24px;">📅</div>
-            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
-              WETTEST MONTH
-            </div>
-            <div style="font-size:24px;font-weight:800;margin-top:4px;">
-              ${monthName(months.indexOf(wettestMonth))}
-            </div>
-          </div>
-
-                    <div style="background:rgba(255,255,255,.78);border-radius:16px;padding:18px;">
-            <div style="font-size:24px;">📊</div>
-            <div style="font-size:12px;font-weight:800;letter-spacing:.06em;margin-top:8px;">
-              DIFFERENCE
-            </div>
-            <div style="font-size:30px;font-weight:800;margin-top:4px;">
-              ${difference>=0?'+':''}${money(difference)}
-            </div>
+          <div style="font-size:15px;font-weight:800;">
+            Total: ${money(ytd)}
           </div>
 
         </div>
 
-        <div style="margin-top:28px;background:rgba(255,255,255,.72);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.05);">
+        ${chart(
+          months,
+          ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+          true
+        )}
 
-          <div style="display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:14px;flex-wrap:wrap;">
-            <div>
-              <div style="font-size:13px;font-weight:800;letter-spacing:.08em;">
-                MONTHLY RAINFALL
-              </div>
-              <div style="font-size:14px;opacity:.7;margin-top:4px;">
-                ${y} rainfall by month
-              </div>
-            </div>
-
-            <div style="font-size:13px;font-weight:700;">
-              Total: ${money(ytd)}
-            </div>
-          </div>
-
-          ${chart(
-            months,
-            ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-            true
-          )}
-
-        </div>
       </div>
 
     </div>
-  `;
+
+  </div>
+`;
   }
 function yearly(){const rows=read(), years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();if(!years.length)return empty();const metrics=years.map(y=>{const rs=rows.filter(r=>r.date.startsWith(y+'-')), ms=byMonth(rows,y).map(sum), max=Math.max(...ms);return [y,rs,ms,max]});return `<div class="panel"><h2>Yearly rainfall</h2>${chart(metrics.map(x=>sum(x[1])),years)}<div class="wide"><table class="stat-table"><thead><tr><th>Year</th><th>Annual rainfall</th><th>Rainy days</th><th>Wettest month</th><th>Maximum daily rainfall</th></tr></thead><tbody>${metrics.map(([y,rs,ms,max])=>`<tr><td>${y}</td><td>${money(sum(rs))}</td><td>${rainy(rs).length}</td><td>${monthName(ms.indexOf(max))}</td><td>${money(Math.max(0,...rs.map(r=>r.rainfall_mm)))}</td></tr>`).join('')}</tbody></table></div></div>`}
 function compare(){const years=[...new Set(read().map(r=>r.date.slice(0,4)))].sort().reverse();if(years.length<2)return empty('At least two years of rainfall data are needed for a comparison.');return `<div class="panel"><div class="toolbar"><h2>Compare years</h2><div><select id="year-a">${years.map(y=>`<option>${y}</option>`)}</select> <select id="year-b">${years.map((y,i)=>`<option ${i===1?'selected':''}>${y}</option>`)}</select></div></div><div id="comparison"></div></div>`}
