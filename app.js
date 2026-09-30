@@ -779,7 +779,7 @@ function snapshot(){
       </div>
 
 
-      <div style="margin-top:34px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);gap:34px;align-items:center;padding:28px;border-radius:24px;background-image:linear-gradient(90deg,rgba(234,247,255,.98) 0%,rgba(255,255,255,.92) 48%,rgba(255,255,255,.55) 72%,rgba(255,255,255,.15) 100%),url('rain-hero.jpg');background-size:cover;background-position:center right;">
+      <div style="margin-top:34px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);gap:34px;align-items:center;padding:28px;border-radius:24px;background-image:linear-gradient(90deg,rgba(234,247,255,1) 0%,rgba(255,255,255,.96) 35%,rgba(255,255,255,.72) 55%,rgba(255,255,255,.25) 78%,rgba(255,255,255,.05) 100%),url('rain-hero.jpg');background-size:cover;background-position:center right;">
 
         <div>
 
