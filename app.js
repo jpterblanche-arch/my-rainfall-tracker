@@ -749,7 +749,7 @@ function snapshot(){
  return `
   <div class="panel" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#eaf7ff 0%,#ffffff 48%,#eef8f0 100%);">
 
-    <div style="padding:34px 36px 30px;">
+    <div style="padding:34px 36px 30px;background:radial-gradient(circle at 88% 18%,rgba(66,165,245,.16) 0,rgba(66,165,245,.06) 18%,transparent 42%),radial-gradient(circle at 78% 5%,rgba(120,144,156,.10) 0,transparent 28%);">
 
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
 
