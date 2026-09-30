@@ -200,7 +200,7 @@ function chart(values, labels, detailed=false, highlights={}){
   return `<div class="chart chart-detailed">
     ${values.map((v,i)=>`
       <div class="bar-wrap">
-        <div class="bar-value">${Number(v).toFixed(1)}</div>
+        ${Number(v)>0 ? `<div class="bar-value">${Number(v).toFixed(1)}</div>` : ''}
         <div class="bar-area" style="height:220px;">
           <div
             class="bar"
