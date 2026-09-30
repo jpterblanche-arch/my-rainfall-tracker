@@ -8,7 +8,7 @@ const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 
 let page = 'dashboard', editing = null, session = null;
 let intensityYear = 'all';
 let matrixYear = 'all';
-
+let snapshotYear = '';
 const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
 const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights']];
