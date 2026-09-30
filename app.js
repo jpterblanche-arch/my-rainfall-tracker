@@ -8,7 +8,6 @@ const PUBLIC_VIEW = new URLSearchParams(window.location.search).get('view') === 
 let page = 'dashboard', editing = null, session = null;
 let intensityYear = 'all';
 let matrixYear = 'all';
-let snapshotYear = '';
 
 const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
@@ -684,9 +683,7 @@ function snapshot(){
   const currentYear=String(now.getFullYear());
   const todayKey=`${currentYear}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-  const y=snapshotYear&&years.includes(snapshotYear)
-  ? snapshotYear
-  : (years.includes(currentYear) ? currentYear : years[0]);
+ const y=years.includes(currentYear) ? currentYear : years[0];
 
   const yearRows=rows.filter(r=>r.date.startsWith(`${y}-`));
 
@@ -1333,12 +1330,7 @@ function bind(){
       render();
     };
   }
-if(page==='snapshot'){
-    $('#snapshot-year').onchange=e=>{
-      snapshotYear=e.target.value;
-      render();
-    };
-  }
+
   if(page==='compare'){
     $('#year-a').onchange=drawCompare;
     $('#year-b').onchange=drawCompare;
