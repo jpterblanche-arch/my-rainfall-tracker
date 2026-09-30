@@ -204,7 +204,7 @@ function chart(values, labels, detailed=false, highlights={}){
         <div class="bar-area" style="height:220px;">
           <div
             class="bar"
-            style="height:${Math.max(v?6:1,v/max*100)}%"
+           style="height:${Math.max(v?6:1,v/max*100)}%;${v===max?'background:linear-gradient(#4caf50,#2e8b36);':''}"
             data-tip="${labels[i]}: ${money(v)}"
             tabindex="0">
           </div>
