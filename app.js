@@ -1332,6 +1332,12 @@ function bind(){
       render();
     };
   }
+  if(page==='snapshot'){
+  $('#snapshot-year').onchange=e=>{
+    snapshotYear=e.target.value;
+    render();
+  };
+}
 
   if(page==='compare'){
     $('#year-a').onchange=drawCompare;
