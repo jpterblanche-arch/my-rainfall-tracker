@@ -308,11 +308,11 @@ const driestYear=annualTotals.length
     <section class="dashboard-hero">
 
       <div class="hero-copy">
-        <p class="hero-eyebrow">RAINFALL AT A GLANCE</p>
+        <p class="hero-eyebrow" style="font-size:12px;">RAINFALL AT A GLANCE</p>
 
-        <h2>${y} rainfall performance</h2>
+       <h2 style="font-size:21px;">${y} rainfall performance</h2>
 
-        <p class="hero-sub">
+       <p class="hero-sub" style="font-size:13px;">
           Rainfall recorded up to
           ${now.toLocaleDateString(undefined,{
             day:'numeric',
@@ -325,20 +325,19 @@ const driestYear=annualTotals.length
       <div class="hero-main">
 
         <div>
-          <span class="hero-label">${y} YTD</span>
+          <span class="hero-label" style="font-size:13px;">${y} YTD</span>
 
-          <div class="hero-value">
+         <div class="hero-value" style="font-size:44px;">
             ${money(ytd)}
           </div>
         </div>
 
         <div class="hero-status ${statusClass}">
-          <strong>${status}</strong>
-
-          <span>
-            ${ytdDifference>=0?'+':''}${money(ytdDifference)}
-            vs historical average
-          </span>
+         <strong style="font-size:16px;">${status}</strong>
+         <span style="font-size:13px;">
+  ${ytdDifference>=0?'+':''}${money(ytdDifference)}
+  vs historical average
+</span>
         </div>
 
       </div>
