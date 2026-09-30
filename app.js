@@ -347,7 +347,7 @@ const driestYear=annualTotals.length
     <div class="comparison-head">
 
     <span style="font-size:15px;font-weight:600;">
-      ${y} YTD (${money(ytd)}) compared with historical average
+      ${y} YTD (${money(ytd)}) compared with historical average (${money(historicalAverageYTD)})
     </span>
 
     <b style="font-size:16px;">
