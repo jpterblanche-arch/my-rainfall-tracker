@@ -721,11 +721,16 @@ function snapshot(){
     ? difference/historicalAverage*100
     : 0;
 
-  const months=byMonth(rows,y).map(rs=>
-    sum(
-      rs.filter(r=>r.date.slice(5,10)<=cutoff)
+  const months=Array.from({length:12},(_,i)=>{
+  const monthKey=String(i+1).padStart(2,'0');
+
+  return sum(
+    yearRows.filter(r=>
+      r.date.startsWith(`${y}-${monthKey}-`) &&
+      r.date.slice(5,10)<=cutoff
     )
   );
+});
 
   const wettestMonth=Math.max(...months,0);
   const driestMonth=Math.min(...months);
