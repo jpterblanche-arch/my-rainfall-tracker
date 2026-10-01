@@ -426,3 +426,36 @@
     padding:9px 10px;
   }
 }
+/* Mobile menu button */
+@media(max-width:850px){
+
+  #menu{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:42px;
+    height:42px;
+    min-width:42px;
+    min-height:42px;
+    margin-right:10px;
+
+    border:1px solid #d9e5f1;
+    border-radius:10px;
+
+    background:#eaf5ff;
+    color:var(--blue);
+
+    font-size:24px;
+    line-height:1;
+    font-weight:600;
+
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  #menu:active{
+    background:#dceeff;
+    transform:scale(.97);
+  }
+
+}
