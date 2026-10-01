@@ -910,7 +910,202 @@ function snapshot(){
   }
 function yearly(){const rows=read(), years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();if(!years.length)return empty();const metrics=years.map(y=>{const rs=rows.filter(r=>r.date.startsWith(y+'-')), ms=byMonth(rows,y).map(sum), max=Math.max(...ms);return [y,rs,ms,max]});return `<div class="panel"><h2>Yearly rainfall</h2>${chart(metrics.map(x=>sum(x[1])),years)}<div class="wide"><table class="stat-table"><thead><tr><th>Year</th><th>Annual rainfall</th><th>Rainy days</th><th>Wettest month</th><th>Maximum daily rainfall</th></tr></thead><tbody>${metrics.map(([y,rs,ms,max])=>`<tr><td>${y}</td><td>${money(sum(rs))}</td><td>${rainy(rs).length}</td><td>${monthName(ms.indexOf(max))}</td><td>${money(Math.max(0,...rs.map(r=>r.rainfall_mm)))}</td></tr>`).join('')}</tbody></table></div></div>`}
 function compare(){const years=[...new Set(read().map(r=>r.date.slice(0,4)))].sort().reverse();if(years.length<2)return empty('At least two years of rainfall data are needed for a comparison.');return `<div class="panel"><div class="toolbar"><h2>Compare years</h2><div><select id="year-a">${years.map(y=>`<option>${y}</option>`)}</select> <select id="year-b">${years.map((y,i)=>`<option ${i===1?'selected':''}>${y}</option>`)}</select></div></div><div id="comparison"></div></div>`}
-function drawCompare(){const a=$('#year-a').value,b=$('#year-b').value,rows=read(),ar=rows.filter(r=>r.date.startsWith(a+'-')),br=rows.filter(r=>r.date.startsWith(b+'-')),av=byMonth(rows,a).map(sum),bv=byMonth(rows,b).map(sum),at=sum(ar),bt=sum(br),diff=at-bt,pct=bt?diff/bt*100:null;$('#comparison').innerHTML=`<div class="cards"><div class="card"><label>${a} TOTAL</label><div class="metric">${money(at)}</div></div><div class="card"><label>${b} TOTAL</label><div class="metric">${money(bt)}</div></div><div class="card"><label>DIFFERENCE</label><div class="metric">${money(diff)}</div><div class="sub">${pct===null?'Percentage unavailable (comparison is zero)':pct.toFixed(1)+'%'}</div></div><div class="card"><label>RAINY DAYS</label><div class="metric">${rainy(ar).length} / ${rainy(br).length}</div><div class="sub">${a} / ${b}</div></div></div><div class="grid"><div class="panel"><h2>Monthly comparison</h2>${chart(av.map((x,i)=>Math.max(x,bv[i])),Array.from({length:12},(_,i)=>monthName(i)))}</div><div class="panel"><h2>Key comparison</h2><div class="list"><div class="list-row"><span>Wettest month</span><b>${monthName(av.indexOf(Math.max(...av)))} / ${monthName(bv.indexOf(Math.max(...bv)))}</b></div><div class="list-row"><span>Max daily rainfall</span><b>${money(Math.max(0,...ar.map(r=>r.rainfall_mm)))} / ${money(Math.max(0,...br.map(r=>r.rainfall_mm)))}</b></div></div></div></div><div class="sub">The chart shows the higher of each pair of monthly totals. Detailed values appear below.</div><div class="wide"><table class="stat-table"><thead><tr><th>Month</th><th>${a}</th><th>${b}</th><th>Difference</th></tr></thead><tbody>${av.map((x,i)=>`<tr><td>${monthName(i)}</td><td>${money(x)}</td><td>${money(bv[i])}</td><td>${money(x-bv[i])}</td></tr>`).join('')}</tbody></table></div>`}
+function drawCompare(){
+  const a=$('#year-a').value,
+        b=$('#year-b').value,
+        rows=read(),
+        ar=rows.filter(r=>r.date.startsWith(a+'-')),
+        br=rows.filter(r=>r.date.startsWith(b+'-')),
+        av=byMonth(rows,a).map(sum),
+        bv=byMonth(rows,b).map(sum),
+        at=sum(ar),
+        bt=sum(br),
+        diff=at-bt,
+        pct=bt?diff/bt*100:null;
+
+  const months=Array.from(
+    {length:12},
+    (_,i)=>monthName(i)
+  );
+
+  $('#comparison').innerHTML=`
+    <div class="cards">
+
+      <div class="card">
+        <label>${a} TOTAL</label>
+        <div class="metric">${money(at)}</div>
+      </div>
+
+      <div class="card">
+        <label>${b} TOTAL</label>
+        <div class="metric">${money(bt)}</div>
+      </div>
+
+      <div class="card">
+        <label>DIFFERENCE</label>
+        <div class="metric">${money(diff)}</div>
+        <div class="sub">
+          ${pct===null
+            ? 'Percentage unavailable (comparison is zero)'
+            : pct.toFixed(1)+'%'}
+        </div>
+      </div>
+
+      <div class="card">
+        <label>RAINY DAYS</label>
+        <div class="metric">
+          ${rainy(ar).length} / ${rainy(br).length}
+        </div>
+        <div class="sub">${a} / ${b}</div>
+      </div>
+
+    </div>
+
+    <div class="grid">
+
+      <div class="panel">
+        <h2>Monthly comparison</h2>
+
+        <div style="
+          display:flex;
+          justify-content:center;
+          gap:24px;
+          margin-bottom:14px;
+          font-size:13px;
+          font-weight:600;
+        ">
+          <span>■ ${a}</span>
+          <span>■ ${b}</span>
+        </div>
+
+        <div class="compare-chart">
+          ${months.map((month,i)=>{
+
+            const max=Math.max(av[i],bv[i],1);
+
+            return `
+              <div
+                class="compare-month"
+                style="
+                  flex:1;
+                  min-width:0;
+                  display:flex;
+                  flex-direction:column;
+                  align-items:center;
+                "
+              >
+
+                <div
+                  style="
+                    height:220px;
+                    width:100%;
+                    display:flex;
+                    align-items:flex-end;
+                    justify-content:center;
+                    gap:3px;
+                  "
+                >
+
+                  <div
+                    class="bar"
+                    style="
+                      height:${Math.max(av[i]?6:1,av[i]/max*100)}%;
+                      flex:0 0 42%;
+                    "
+                    data-tip="${a}: ${money(av[i])}"
+                    tabindex="0">
+                  </div>
+
+                  <div
+                    class="bar"
+                    style="
+                      height:${Math.max(bv[i]?6:1,bv[i]/max*100)}%;
+                      flex:0 0 42%;
+                    "
+                    data-tip="${b}: ${money(bv[i])}"
+                    tabindex="0">
+                  </div>
+
+                </div>
+
+                <div
+                  class="bar-label"
+                  style="margin-top:6px;"
+                >
+                  ${month}
+                </div>
+
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="sub" style="margin-top:10px;">
+          Each month shows rainfall for both selected years.
+          Hover over a bar for the exact rainfall.
+        </div>
+
+      </div>
+
+      <div class="panel">
+        <h2>Key comparison</h2>
+
+        <div class="list">
+
+          <div class="list-row">
+            <span>Wettest month</span>
+            <b>
+              ${monthName(av.indexOf(Math.max(...av)))}
+              /
+              ${monthName(bv.indexOf(Math.max(...bv)))}
+            </b>
+          </div>
+
+          <div class="list-row">
+            <span>Max daily rainfall</span>
+            <b>
+              ${money(Math.max(0,...ar.map(r=>r.rainfall_mm)))}
+              /
+              ${money(Math.max(0,...br.map(r=>r.rainfall_mm)))}
+            </b>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="wide">
+
+      <table class="stat-table">
+
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>${a}</th>
+            <th>${b}</th>
+            <th>Difference</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${av.map((x,i)=>`
+            <tr>
+              <td>${monthName(i)}</td>
+              <td>${money(x)}</td>
+              <td>${money(bv[i])}</td>
+              <td>${money(x-bv[i])}</td>
+            </tr>
+          `).join('')}
+
+        </tbody>
+
+      </table>
+
+    </div>
+  `;
+}
 function importer(){return `<div class="two"><div class="panel"><h2>Import rainfall data</h2><p class="sub">CSV headings: <code>date,rainfall_mm,notes</code></p><p class="sub">Duplicates, invalid dates, negative values, and invalid rainfall values are rejected.</p><div class="actions"><button class="primary" id="choose-file">Choose CSV file</button><button class="secondary" id="load-included">Load included rainfall history</button></div><div id="import-message" style="margin-top:14px"></div></div><div class="panel"><h2>Export data</h2><p class="sub">Download all stored rainfall records in a compatible CSV format.</p><button class="secondary" id="export-all">Export all records</button></div></div>`}
 function insights(){
   const rows=read();
