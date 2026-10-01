@@ -747,9 +747,128 @@ function snapshot(){
   );
 
  return `
-  <div class="panel" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#eaf7ff 0%,#ffffff 48%,#eef8f0 100%);">
+ <style>
+@media (max-width:600px){
 
-    <div style="padding:34px 36px 30px;background:radial-gradient(circle at 88% 18%,rgba(66,165,245,.16) 0,rgba(66,165,245,.06) 18%,transparent 42%),radial-gradient(circle at 78% 5%,rgba(120,144,156,.10) 0,transparent 28%);">
+  /* Snapshot mobile layout */
+  .snapshot-panel{
+    width:100%;
+    max-width:100%;
+    overflow:hidden !important;
+  }
+
+  .snapshot-inner{
+    padding:20px 14px 24px !important;
+  }
+
+  /* Header */
+  .snapshot-inner > div:first-child{
+    gap:12px !important;
+  }
+
+  .snapshot-inner > div:first-child > div:first-child > div:nth-child(2){
+    font-size:30px !important;
+  }
+
+  /* Main rainfall card */
+  .snapshot-main{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+    margin-top:20px !important;
+    padding:18px !important;
+    border-radius:20px !important;
+    background-position:center right !important;
+  }
+
+  /* Big rainfall number */
+  .snapshot-ytd{
+    font-size:52px !important;
+    line-height:.95 !important;
+    letter-spacing:-.045em !important;
+    margin:6px 0 10px !important;
+    white-space:nowrap !important;
+  }
+
+  /* Percentage statement */
+  .snapshot-main > div:first-child > div:nth-child(3){
+    font-size:18px !important;
+    line-height:1.2 !important;
+  }
+
+  .snapshot-main > div:first-child > div:nth-child(4){
+    font-size:13px !important;
+    line-height:1.35 !important;
+  }
+
+  /* Historical comparison box */
+  .snapshot-main > div:last-child{
+    width:100% !important;
+    box-sizing:border-box !important;
+    padding:16px !important;
+    border-radius:18px !important;
+  }
+
+  .snapshot-main > div:last-child > div:first-child{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:5px !important;
+    font-size:12px !important;
+  }
+
+  .snapshot-main > div:last-child > div:last-child{
+    font-size:14px !important;
+  }
+
+  /* Three KPI cards */
+  .snapshot-kpis{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:8px !important;
+    margin-top:18px !important;
+  }
+
+  .snapshot-kpis > div{
+    min-width:0 !important;
+    padding:12px 8px !important;
+    border-radius:14px !important;
+    overflow:hidden !important;
+  }
+
+  .snapshot-kpis > div > div:first-child{
+    font-size:22px !important;
+  }
+
+  .snapshot-kpis > div > div:nth-child(2){
+    font-size:9px !important;
+    letter-spacing:.08em !important;
+    line-height:1.15 !important;
+  }
+
+  .snapshot-kpis > div > div:nth-child(3){
+    font-size:25px !important;
+    line-height:1.05 !important;
+  }
+
+  .snapshot-kpis > div > div:nth-child(4){
+    font-size:10px !important;
+    line-height:1.2 !important;
+  }
+
+  /* Text below KPI cards */
+  .snapshot-panel{
+    font-size:14px;
+  }
+
+  /* Monthly chart/card */
+  .snapshot-panel .chart{
+    max-width:100% !important;
+    overflow:hidden !important;
+  }
+
+}
+</style>
+  <div class="panel snapshot-panel" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#eaf7ff 0%,#ffffff 48%,#eef8f0 100%);">
+
+    <div class="snapshot-inner" style="padding:34px 36px 30px;background:radial-gradient(circle at 88% 18%,rgba(66,165,245,.16) 0,rgba(66,165,245,.06) 18%,transparent 42%),radial-gradient(circle at 78% 5%,rgba(120,144,156,.10) 0,transparent 28%);">
 
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
 
@@ -787,7 +906,7 @@ function snapshot(){
             Rainfall recorded
           </div>
 
-          <div style="font-size:76px;line-height:.95;font-weight:900;letter-spacing:-.055em;margin:8px 0 12px;">
+         <div class="snapshot-ytd" style="font-size:76px;line-height:.95;font-weight:900;letter-spacing:-.055em;margin:8px 0 12px;">
             ${money(ytd)}
           </div>
 
@@ -823,7 +942,7 @@ function snapshot(){
       </div>
 
 
-      <div style="margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+      <div class="snapshot-kpis" style="margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
 
         <div style="background:rgba(255,255,255,.72);border-radius:18px;padding:20px;">
           <div style="font-size:26px;">🌧️</div>
