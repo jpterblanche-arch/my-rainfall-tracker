@@ -928,7 +928,10 @@ function drawCompare(){
     (_,i)=>monthName(i)
   );
 
+  const chartMax=Math.max(...av,...bv,1);
+
   $('#comparison').innerHTML=`
+
     <div class="cards">
 
       <div class="card">
@@ -961,93 +964,146 @@ function drawCompare(){
 
     </div>
 
+
     <div class="grid">
 
       <div class="panel">
+
         <h2>Monthly comparison</h2>
 
         <div style="
           display:flex;
           justify-content:center;
-          gap:24px;
-          margin-bottom:14px;
-          font-size:13px;
+          align-items:center;
+          gap:22px;
+          margin:8px 0 18px;
+          font-size:12px;
           font-weight:600;
         ">
-          <span>■ ${a}</span>
-          <span>■ ${b}</span>
+
+          <span>
+            <span style="
+              display:inline-block;
+              width:10px;
+              height:10px;
+              border-radius:2px;
+              background:#2196f3;
+              margin-right:5px;
+            "></span>
+            ${a}
+          </span>
+
+          <span>
+            <span style="
+              display:inline-block;
+              width:10px;
+              height:10px;
+              border-radius:2px;
+              background:#90a4ae;
+              margin-right:5px;
+            "></span>
+            ${b}
+          </span>
+
         </div>
 
-        <div class="compare-chart">
-          ${months.map((month,i)=>{
 
-            const max=Math.max(av[i],bv[i],1);
+        <div style="
+          position:relative;
+          height:260px;
+          padding:0 8px 30px;
+          border-bottom:1px solid #dfe5ec;
+        ">
 
-            return `
-              <div
-                class="compare-month"
-                style="
-                  flex:1;
-                  min-width:0;
-                  display:flex;
-                  flex-direction:column;
-                  align-items:center;
-                "
-              >
+          <div style="
+            height:220px;
+            display:grid;
+            grid-template-columns:repeat(12,minmax(0,1fr));
+            gap:7px;
+            align-items:end;
+          ">
+
+            ${months.map((month,i)=>`
+
+              <div style="
+                height:100%;
+                display:flex;
+                align-items:flex-end;
+                justify-content:center;
+                gap:2px;
+                min-width:0;
+              ">
 
                 <div
                   style="
-                    height:220px;
-                    width:100%;
-                    display:flex;
-                    align-items:flex-end;
-                    justify-content:center;
-                    gap:3px;
+                    width:calc(50% - 1px);
+                    max-width:20px;
+                    height:${Math.max(
+                      av[i] ? 3 : 1,
+                      av[i]/chartMax*100
+                    )}%;
+                    background:#2196f3;
+                    border-radius:4px 4px 0 0;
+                    cursor:pointer;
                   "
-                >
-
-                  <div
-                    class="bar"
-                    style="
-                      height:${Math.max(av[i]?6:1,av[i]/max*100)}%;
-                      flex:0 0 42%;
-                    "
-                    data-tip="${a}: ${money(av[i])}"
-                    tabindex="0">
-                  </div>
-
-                  <div
-                    class="bar"
-                    style="
-                      height:${Math.max(bv[i]?6:1,bv[i]/max*100)}%;
-                      flex:0 0 42%;
-                    "
-                    data-tip="${b}: ${money(bv[i])}"
-                    tabindex="0">
-                  </div>
-
+                  data-tip="${a}: ${money(av[i])}"
+                  tabindex="0">
                 </div>
 
                 <div
-                  class="bar-label"
-                  style="margin-top:6px;"
-                >
-                  ${month}
+                  style="
+                    width:calc(50% - 1px);
+                    max-width:20px;
+                    height:${Math.max(
+                      bv[i] ? 3 : 1,
+                      bv[i]/chartMax*100
+                    )}%;
+                    background:#90a4ae;
+                    border-radius:4px 4px 0 0;
+                    cursor:pointer;
+                  "
+                  data-tip="${b}: ${money(bv[i])}"
+                  tabindex="0">
                 </div>
 
               </div>
-            `;
-          }).join('')}
+
+            `).join('')}
+
+          </div>
+
+
+          <div style="
+            display:grid;
+            grid-template-columns:repeat(12,minmax(0,1fr));
+            gap:7px;
+            margin-top:7px;
+          ">
+
+            ${months.map(month=>`
+              <div style="
+                text-align:center;
+                font-size:10px;
+                color:#52606d;
+              ">
+                ${month}
+              </div>
+            `).join('')}
+
+          </div>
+
         </div>
 
-        <div class="sub" style="margin-top:10px;">
-          Each month shows rainfall for both selected years.
-          Hover over a bar for the exact rainfall.
+
+        <div class="sub" style="margin-top:12px;">
+          Monthly rainfall for both selected years. The vertical scale is the same for every month.
         </div>
 
       </div>
 
+
       <div class="panel">
+
         <h2>Key comparison</h2>
 
         <div class="list">
@@ -1071,9 +1127,11 @@ function drawCompare(){
           </div>
 
         </div>
+
       </div>
 
     </div>
+
 
     <div class="wide">
 
@@ -1091,12 +1149,14 @@ function drawCompare(){
         <tbody>
 
           ${av.map((x,i)=>`
+
             <tr>
               <td>${monthName(i)}</td>
               <td>${money(x)}</td>
               <td>${money(bv[i])}</td>
               <td>${money(x-bv[i])}</td>
             </tr>
+
           `).join('')}
 
         </tbody>
@@ -1104,6 +1164,7 @@ function drawCompare(){
       </table>
 
     </div>
+
   `;
 }
 function importer(){return `<div class="two"><div class="panel"><h2>Import rainfall data</h2><p class="sub">CSV headings: <code>date,rainfall_mm,notes</code></p><p class="sub">Duplicates, invalid dates, negative values, and invalid rainfall values are rejected.</p><div class="actions"><button class="primary" id="choose-file">Choose CSV file</button><button class="secondary" id="load-included">Load included rainfall history</button></div><div id="import-message" style="margin-top:14px"></div></div><div class="panel"><h2>Export data</h2><p class="sub">Download all stored rainfall records in a compatible CSV format.</p><button class="secondary" id="export-all">Export all records</button></div></div>`}
