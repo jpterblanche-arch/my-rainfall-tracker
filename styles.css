@@ -396,3 +396,33 @@
   }
 
 }
+/* Compare Years selectors */
+#year-a,
+#year-b{
+  font-size:16px;
+  padding:9px 12px;
+  min-width:110px;
+  min-height:42px;
+  border:1px solid #ccd8e5;
+  border-radius:8px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  cursor:pointer;
+}
+
+#year-a:focus,
+#year-b:focus{
+  outline:2px solid rgba(22,119,217,.20);
+  border-color:var(--blue);
+}
+
+@media(max-width:600px){
+  #year-a,
+  #year-b{
+    min-width:100px;
+    min-height:44px;
+    font-size:16px;
+    padding:9px 10px;
+  }
+}
