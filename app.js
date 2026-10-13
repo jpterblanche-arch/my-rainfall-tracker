@@ -224,8 +224,34 @@ const varianceBar = (percentage, lightSurface=false) => {
       </div>
     </div>`;
 };
+function setMenuOpen(open){
+  const sidebar=$('aside');
+  const menu=$('#menu');
+  const backdrop=$('#menu-backdrop');
+  sidebar?.classList.toggle('open',open);
+  backdrop?.classList.toggle('open',open);
+  menu?.setAttribute('aria-expanded',String(open));
+}
+function initialiseMenu(){
+  const sidebar=$('aside');
+  const menu=$('#menu');
+  if(!sidebar||!menu)return;
+
+  sidebar.id='sidebar';
+  menu.setAttribute('aria-controls','sidebar');
+  menu.setAttribute('aria-expanded','false');
+  sidebar.insertAdjacentHTML('afterbegin','<button id="close-menu" type="button" aria-label="Close menu">×</button>');
+  document.body.insertAdjacentHTML('beforeend','<button id="menu-backdrop" type="button" aria-label="Close menu"></button>');
+
+  menu.onclick=()=>setMenuOpen(true);
+  $('#close-menu').onclick=()=>setMenuOpen(false);
+  $('#menu-backdrop').onclick=()=>setMenuOpen(false);
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape')setMenuOpen(false);
+  });
+}
 function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)?.[1]||'Dashboard'; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
-function go(p){if(!pages.some(([id])=>id===p))return;page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
+function go(p){if(!pages.some(([id])=>id===p))return;page=p;editing=null; setMenuOpen(false); nav(); render();}
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
 function chart(values, labels, detailed=false, highlights={}){
@@ -1888,7 +1914,7 @@ async function completeImport(text){
         Import could not be saved: ${esc(error.message)}
       </div>`;
   }
-} $('#csv-file').onchange=async event=>{completeImport(await event.target.files[0].text());event.target.value=''};$('#menu').onclick=()=>$('aside').classList.toggle('open'); db.auth.onAuthStateChange((event,newSession)=>{
+} $('#csv-file').onchange=async event=>{completeImport(await event.target.files[0].text());event.target.value=''};initialiseMenu(); db.auth.onAuthStateChange((event,newSession)=>{
   session=newSession;
 
   if(event==='SIGNED_IN'){
