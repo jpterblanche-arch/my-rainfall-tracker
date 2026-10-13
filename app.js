@@ -65,6 +65,8 @@ async function loadPublicFromSupabase(){
 }
 
 async function save(rows){
+  if(PUBLIC_VIEW) throw new Error('Public view is read-only.');
+
   const old = read();
   localStorage.setItem(KEY, JSON.stringify(rows));
 
@@ -155,6 +157,8 @@ async function save(rows){
 
     try{
       await loadPublicFromSupabase();
+      syncStatus('🔒 Public read-only');
+      document.querySelector('.quick')?.remove();
       nav();
       render();
     }catch(error){
@@ -189,8 +193,8 @@ async function save(rows){
 const rainy = rows => rows.filter(r=>Number(r.rainfall_mm)>=.1);
 const monthName = i => new Date(2000,i,1).toLocaleString(undefined,{month:'short'});
 const esc = s => String(s||'').replace(/[&<>"']/g, x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
-function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)[1]; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
-function go(p){page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
+function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)?.[1]||'Dashboard'; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
+function go(p){if(!pages.some(([id])=>id===p))return;page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
 function chart(values, labels, detailed=false, highlights={}){
@@ -1833,7 +1837,7 @@ function bind(){
   }
 }
 function message(t,bad=false){const old=$('#record-form')?.previousElementSibling;if(old?.classList.contains('notice')||old?.classList.contains('error'))old.remove();$('#record-form')?.insertAdjacentHTML('beforebegin',`<div class="${bad?'error':'notice'}">${t}</div>`)}
-function render(){const views={dashboard,record,history,monthly,matrix,yearly,compare,snapshot,insights,import:importer,settings};$('#content').innerHTML=views[page]();bind()}
+function render(){const views={dashboard,record,history,monthly,matrix,yearly,compare,snapshot,insights,import:importer,settings};if(!pages.some(([id])=>id===page))page='dashboard';$('#content').innerHTML=views[page]();bind()}
 function parseCsvLine(line){const fields=[];let value='',quoted=false;for(let i=0;i<line.length;i++){const character=line[i];if(character==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++}else quoted=!quoted}else if(character===','&&!quoted){fields.push(value);value=''}else value+=character}if(quoted)return {error:'unclosed quoted field'};fields.push(value);return {fields}}
 function parseImport(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter((line,index)=>index===0||line.trim()!==''), rejected=[], parsed=[], existing=new Set(read().map(record=>record.date));const header=parseCsvLine(lines.shift()||'');if(header.error||header.fields.map(value=>value.trim().toLowerCase()).join(',')!=='date,rainfall_mm,notes')return {parsed,rejected:['Header must be exactly: date,rainfall_mm,notes']};for(let index=0;index<lines.length;index++){const row=parseCsvLine(lines[index]), rowNumber=index+2;if(row.error){rejected.push(`Row ${rowNumber}: ${row.error}`);continue}let fields=row.fields;if(fields.length===4&&fields[3]===''&&/^\d+$/.test(fields[1].trim())&&/^\d+$/.test(fields[2].trim()))fields=[fields[0],fields[1]+'.'+fields[2],''];const [date,rawRainfall,notes,...extra]=fields;if(extra.length||fields.length!==3){rejected.push(`Row ${rowNumber}: expected date,rainfall_mm,notes (or date,whole,decimal,)`);continue}if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){rejected.push(`Row ${rowNumber}: date must use YYYY-MM-DD`);continue}const dateValue=new Date(`${date}T00:00:00Z`);if(Number.isNaN(dateValue.getTime())||dateValue.toISOString().slice(0,10)!==date){rejected.push(`Row ${rowNumber}: invalid calendar date`);continue}const rainfall=Number(rawRainfall);if(rawRainfall.trim()===''||!Number.isFinite(rainfall)){rejected.push(`Row ${rowNumber}: rainfall_mm must be a number`);continue}if(rainfall<0){rejected.push(`Row ${rowNumber}: rainfall_mm cannot be negative`);continue}if(existing.has(date)){rejected.push(`Row ${rowNumber}: a record already exists for ${date}`);continue}parsed.push({date,rainfall_mm:rainfall,notes:notes||''});existing.add(date)}return {parsed,rejected}}
 async function completeImport(text){
