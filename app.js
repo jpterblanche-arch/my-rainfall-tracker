@@ -200,6 +200,30 @@ const benchmarkNote = (includedYears, excludedYear, excludedYearReason, hasParti
     : '';
   return `Benchmark years: ${included}.${partialYearNote} ${excludedYear} is excluded ${excludedYearReason}.`;
 };
+const varianceBar = (percentage, lightSurface=false) => {
+  if(!Number.isFinite(percentage)){
+    return '<p class="sub" style="margin:12px 0 0;">No historical benchmark is available yet.</p>';
+  }
+
+  const scale = Math.max(100, Math.ceil(Math.abs(percentage) / 25) * 25);
+  const width = Math.abs(percentage) / scale * 50;
+  const left = percentage >= 0 ? 50 : 50 - width;
+  const color = percentage >= 0 ? (lightSurface ? '#278854' : '#74d39a') : (lightSurface ? '#ca8a04' : '#ffd166');
+  const track = lightSurface ? '#e1e9f0' : 'rgba(255,255,255,.22)';
+  const marker = lightSurface ? '#526071' : 'rgba(255,255,255,.92)';
+  const direction = percentage < 0 ? 'below' : 'above';
+
+  return `
+    <div role="img" aria-label="${Math.abs(percentage).toFixed(1)}% ${direction} the historical average" style="margin-top:12px;">
+      <div style="position:relative;height:14px;border-radius:999px;background:${track};overflow:hidden;">
+        <div style="position:absolute;left:calc(50% - 1px);top:0;width:2px;height:100%;background:${marker};"></div>
+        <div style="position:absolute;left:${left}%;top:2px;width:${width}%;height:10px;border-radius:999px;background:${color};"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;opacity:.82;">
+        <span>−${scale}%</span><span>Historical average</span><span>+${scale}%</span>
+      </div>
+    </div>`;
+};
 function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)?.[1]||'Dashboard'; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
 function go(p){if(!pages.some(([id])=>id===p))return;page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
@@ -373,18 +397,7 @@ const driestYear=annualTotals.length
 
   </div>
 
- <div class="comparison-track">
-
-  <div
-    class="comparison-current"
-    style="width:${
-      historicalAverageYTD
-        ? Math.min((ytd/historicalAverageYTD)*100,100)
-        : 0
-    }%"
-  ></div>
-
-</div>
+ ${varianceBar(historicalAverageYTD ? ytdPercentage : null)}
 
     <p class="hero-sub" style="font-size:12px;margin-top:12px;">
       ${benchmarkNote(historicalYears, y, 'because the year is still in progress', years.includes('2010'))}
@@ -942,9 +955,7 @@ function snapshot(){
             <span>Historical average</span>
           </div>
 
-          <div style="height:22px;background:#dfeaf0;border-radius:999px;overflow:hidden;">
-            <div style="height:100%;width:${historicalAverage ? Math.min((ytd/historicalAverage)*100,100) : 0}%;background:linear-gradient(90deg,#42a5f5,#1976d2);border-radius:999px;"></div>
-          </div>
+          ${varianceBar(historicalAverage ? percentage : null, true)}
 
           <div style="display:flex;justify-content:space-between;margin-top:11px;font-size:15px;">
             <b>${money(ytd)}</b>
