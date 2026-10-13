@@ -463,7 +463,7 @@ const driestYear=annualTotals.length
 
       <div class="panel">
 
-       <h2>2026 rainfall insights</h2>
+       <h2>${y} rainfall insights</h2>
 
 <div class="list">
 
@@ -1412,14 +1412,14 @@ function insights(){
     <div class="grid insights-grid">
 
       <div class="panel" style="grid-column:1 / -1;">
-        <h2>2026 rainfall performance</h2>
+        <h2>${currentYear} rainfall performance</h2>
 <div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
   LONG-TERM COMPARISON
 </div>
 
         <div class="list">
           <div class="list-row">
-            <span><b>2026 to date</b></span>
+            <span><b>${currentYear} to date</b></span>
             <b>${money(currentYTD)}</b>
           </div>
 
@@ -1442,7 +1442,7 @@ function insights(){
 
         <div class="list">
           <div class="list-row">
-            <span><b>2026 to date</b></span>
+            <span><b>${currentYear} to date</b></span>
             <b>${money(currentYTD)}</b>
           </div>
 
