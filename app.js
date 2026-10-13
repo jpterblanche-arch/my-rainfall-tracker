@@ -9,11 +9,14 @@ let page = 'dashboard', editing = null, session = null;
 let intensityYear = 'all';
 let matrixYear = 'all';
 let snapshotYear = '';
+let exploreDataOpen = false;
 const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
 
 const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights']];
 
 const pages = PUBLIC_VIEW ? publicPages : privatePages;
+const publicPrimaryPages = publicPages.slice(0,2);
+const publicExplorePages = publicPages.slice(2);
 const $ = s => document.querySelector(s);
 
 const money = n => {
@@ -250,8 +253,26 @@ function initialiseMenu(){
     if(event.key==='Escape')setMenuOpen(false);
   });
 }
-function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)?.[1]||'Dashboard'; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
-function go(p){if(!pages.some(([id])=>id===p))return;page=p;editing=null; setMenuOpen(false); nav(); render();}
+function nav(){
+  const links = items => items.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join('');
+  const exploreOpen = exploreDataOpen || publicExplorePages.some(([id])=>id===page);
+  $('#nav').innerHTML = PUBLIC_VIEW
+    ? `${links(publicPrimaryPages)}
+      <div class="nav-section">
+        <button class="nav-section-toggle" id="explore-data-toggle" type="button" aria-expanded="${exploreOpen}" aria-controls="explore-data-pages">
+          <span>Explore data</span><span aria-hidden="true">${exploreOpen?'⌃':'⌄'}</span>
+        </button>
+        <div id="explore-data-pages" class="nav-section-items" ${exploreOpen?'':'hidden'}>${links(publicExplorePages)}</div>
+      </div>`
+    : links(privatePages);
+  $('#page-title').textContent=pages.find(x=>x[0]===page)?.[1]||'Dashboard';
+  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
+  $('#explore-data-toggle')?.addEventListener('click',()=>{
+    exploreDataOpen=!exploreOpen;
+    nav();
+  });
+}
+function go(p){if(!pages.some(([id])=>id===p))return;page=p;exploreDataOpen=publicExplorePages.some(([id])=>id===p);editing=null; setMenuOpen(false); nav(); render();}
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
 function byMonth(rows,y){return Array.from({length:12},(_,m)=>rows.filter(r=>r.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)));}
 function chart(values, labels, detailed=false, highlights={}){
