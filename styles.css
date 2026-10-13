@@ -512,3 +512,42 @@
     margin-right: 54px;
   }
 }
+/* Collapsible public analysis navigation */
+.nav-section {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.nav-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 13px;
+  background: transparent;
+  color: #9eb6d2;
+  font: 700 11px system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.nav-section-toggle:hover,
+.nav-section-toggle:focus-visible {
+  background: #1e4778;
+  color: #fff;
+}
+
+.nav-section-toggle:focus-visible {
+  outline: 3px solid #8dc8ff;
+  outline-offset: 2px;
+}
+
+.nav-section-items {
+  display: grid;
+  gap: 6px;
+  padding-left: 8px;
+}
