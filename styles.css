@@ -459,3 +459,14 @@
   }
 
 }
+/* Keyboard focus indicators */
+.nav-link:focus-visible {
+  outline: 3px solid #8dc8ff;
+  outline-offset: 2px;
+}
+
+.bar:focus-visible {
+  outline: 3px solid #0c274d;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(22, 119, 217, 0.25);
+}
