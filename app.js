@@ -193,6 +193,13 @@ async function save(rows){
 const rainy = rows => rows.filter(r=>Number(r.rainfall_mm)>=.1);
 const monthName = i => new Date(2000,i,1).toLocaleString(undefined,{month:'short'});
 const esc = s => String(s||'').replace(/[&<>"']/g, x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+const benchmarkNote = (includedYears, excludedYear, excludedYearReason, hasPartialBaselineYear) => {
+  const included = includedYears.length ? includedYears.join(', ') : 'no comparable years';
+  const partialYearNote = hasPartialBaselineYear
+    ? ' 2010 is excluded because it is a partial baseline year.'
+    : '';
+  return `Benchmark years: ${included}.${partialYearNote} ${excludedYear} is excluded ${excludedYearReason}.`;
+};
 function nav(){ $('#nav').innerHTML=pages.map(([id,name])=>`<button class="nav-link ${id===page?'active':''}" data-page="${id}">${name}</button>`).join(''); $('#page-title').textContent=pages.find(x=>x[0]===page)?.[1]||'Dashboard'; document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page)); }
 function go(p){if(!pages.some(([id])=>id===p))return;page=p;editing=null; $('aside').classList.remove('open'); nav(); render();}
 function sum(rows){return rows.reduce((n,r)=>n+Number(typeof r==='number'?r:r.rainfall_mm),0)}
@@ -237,9 +244,10 @@ function dashboard(){
   const ytd=sum(yr);
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
-const completeYears=years.filter(
+const historicalYears=years.filter(
   year=>year!=='2010' && year!==String(y)
 );
+const completeYears=historicalYears;
 
 const annualTotals=completeYears.map(year=>({
   year,
@@ -263,8 +271,7 @@ const driestYear=annualTotals.length
         current.total<best.total ? current : best
     )
   : null;
-  const historicalYTD=years
-    .filter(year=>year!=='2010' && year!==String(y))
+  const historicalYTD=historicalYears
     .map(year=>sum(rows.filter(r=>{
       const d=r.date;
       return d.startsWith(`${year}-`) &&
@@ -379,6 +386,9 @@ const driestYear=annualTotals.length
 
 </div>
 
+    <p class="hero-sub" style="font-size:12px;margin-top:12px;">
+      ${benchmarkNote(historicalYears, y, 'because the year is still in progress', years.includes('2010'))}
+    </p>
   
 </div>
 
@@ -945,6 +955,9 @@ function snapshot(){
 
       </div>
 
+      <p class="sub" style="margin:14px 2px 0;">
+        ${benchmarkNote(historicalYears, y, isCurrentYear ? 'because the year is still in progress' : 'because it is the selected comparison year', years.includes('2010'))}
+      </p>
 
       <div class="snapshot-kpis" style="margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
 
@@ -1324,8 +1337,9 @@ function insights(){
 
   const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
 
-  const historicalYTD=years
-    .filter(y=>y!=='2010' && y!==currentYear)
+  const historicalYears=years.filter(y=>y!=='2010' && y!==currentYear);
+
+  const historicalYTD=historicalYears
     .map(y=>rows
       .filter(r=>{
         const d=r.date;
@@ -1413,6 +1427,7 @@ function insights(){
 
       <div class="panel" style="grid-column:1 / -1;">
         <h2>${currentYear} rainfall performance</h2>
+        <p class="sub">${benchmarkNote(historicalYears, currentYear, 'because the year is still in progress', years.includes('2010'))}</p>
 <div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
   LONG-TERM COMPARISON
 </div>
@@ -1712,7 +1727,7 @@ function matrix(){
 
       <p class="sub" style="margin-top:10px;">
         Highest monthly rainfall is highlighted. Months with the lowest rainfall are shown subtly.
-        Average is based on complete years from 2011 to ${Number(currentYear)-1}.
+        ${benchmarkNote(averageYears, currentYear, 'because the year is still in progress', years.includes('2010'))}
       </p>
 
     </div>
