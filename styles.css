@@ -551,3 +551,6 @@
   gap: 6px;
   padding-left: 8px;
 }
+.nav-section-items[hidden] {
+  display: none;
+}
