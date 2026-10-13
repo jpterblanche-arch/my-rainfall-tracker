@@ -470,3 +470,45 @@
   outline-offset: 3px;
   box-shadow: 0 0 0 5px rgba(22, 119, 217, 0.25);
 }
+/* Mobile sidebar backdrop and close control */
+#menu-backdrop,
+#close-menu {
+  display: none;
+}
+
+@media (max-width: 850px) {
+  #menu-backdrop.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    border: 0;
+    background: rgba(12, 39, 77, 0.48);
+  }
+
+  #close-menu {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font: 30px/1 system-ui, sans-serif;
+    cursor: pointer;
+  }
+
+  #close-menu:focus-visible {
+    outline: 3px solid #8dc8ff;
+    outline-offset: 2px;
+  }
+
+  aside .brand {
+    margin-right: 54px;
+  }
+}
