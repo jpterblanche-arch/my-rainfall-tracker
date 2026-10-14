@@ -218,22 +218,25 @@ const varianceBar = (percentage, lightSurface=false) => {
     return '<p class="sub" style="margin:12px 0 0;">No historical benchmark is available yet.</p>';
   }
 
-  const scale = Math.max(100, Math.ceil(Math.abs(percentage) / 25) * 25);
+  const scale = Math.max(20, Math.ceil(Math.abs(percentage) / 10) * 10);
   const width = Math.abs(percentage) / scale * 50;
-  const left = percentage >= 0 ? 50 : 50 - width;
+  const markerPosition = percentage >= 0 ? 50 + width : 50 - width;
+  const left = Math.min(50, markerPosition);
   const color = percentage >= 0 ? (lightSurface ? '#278854' : '#74d39a') : (lightSurface ? '#ca8a04' : '#ffd166');
   const track = lightSurface ? '#e1e9f0' : 'rgba(255,255,255,.22)';
   const marker = lightSurface ? '#526071' : 'rgba(255,255,255,.92)';
+  const labelColor = lightSurface ? '#526071' : 'rgba(255,255,255,.82)';
   const direction = percentage < 0 ? 'below' : 'above';
 
   return `
     <div role="img" aria-label="${Math.abs(percentage).toFixed(1)}% ${direction} the historical average" style="margin-top:12px;">
-      <div style="position:relative;height:14px;border-radius:999px;background:${track};overflow:hidden;">
+      <div style="position:relative;height:10px;border-radius:999px;background:${track};overflow:hidden;">
         <div style="position:absolute;left:calc(50% - 1px);top:0;width:2px;height:100%;background:${marker};"></div>
-        <div style="position:absolute;left:${left}%;top:2px;width:${width}%;height:10px;border-radius:999px;background:${color};"></div>
+        <div style="position:absolute;left:${left}%;top:2px;width:${width}%;height:6px;border-radius:999px;background:${color};"></div>
+        <div style="position:absolute;left:calc(${markerPosition}% - 5px);top:0;width:10px;height:10px;border:2px solid ${color};border-radius:50%;background:${lightSurface ? '#fff' : '#1769c2'};"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;opacity:.82;">
-        <span>−${scale}%</span><span>Historical average</span><span>+${scale}%</span>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;color:${labelColor};font-size:10px;">
+        <span>Below average</span><span>Historical average</span><span>Above average</span>
       </div>
     </div>`;
 };
