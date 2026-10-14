@@ -196,12 +196,22 @@ async function save(rows){
 const rainy = rows => rows.filter(r=>Number(r.rainfall_mm)>=.1);
 const monthName = i => new Date(2000,i,1).toLocaleString(undefined,{month:'short'});
 const esc = s => String(s||'').replace(/[&<>"']/g, x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+const formatYearRange = years => {
+  const ordered = [...new Set(years)].sort();
+  if(!ordered.length) return 'no comparable years';
+  const isConsecutive = ordered.every((year,index)=>
+    index===0 || Number(year)===Number(ordered[index-1])+1
+  );
+  return isConsecutive && ordered.length > 1
+    ? `${ordered[0]} to ${ordered.at(-1)}`
+    : ordered.join(', ');
+};
 const benchmarkNote = (includedYears, excludedYear, excludedYearReason, hasPartialBaselineYear) => {
-  const included = includedYears.length ? includedYears.join(', ') : 'no comparable years';
+  const included = formatYearRange(includedYears);
   const partialYearNote = hasPartialBaselineYear
     ? ' 2010 is excluded because it is a partial baseline year.'
     : '';
-  return `Benchmark years: ${included}.${partialYearNote} ${excludedYear} is excluded ${excludedYearReason}.`;
+  return `Benchmark years are from ${included}.${partialYearNote} ${excludedYear} is excluded ${excludedYearReason}.`;
 };
 const varianceBar = (percentage, lightSurface=false) => {
   if(!Number.isFinite(percentage)){
