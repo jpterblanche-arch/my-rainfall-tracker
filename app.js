@@ -10,9 +10,10 @@ let intensityYear = 'all';
 let matrixYear = 'all';
 let snapshotYear = '';
 let exploreDataOpen = false;
-const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights'],['import','Import / Export'],['settings','Settings']];
+let rainfallStoryTimer = null;
+const privatePages = [['dashboard','Dashboard'],['record','Record Rainfall'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights'],['story','Rainfall Story'],['import','Import / Export'],['settings','Settings']];
 
-const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights']];
+const publicPages = [['dashboard','Dashboard'],['history','History'],['monthly','Monthly Analysis'],['matrix','Monthly Matrix'],['yearly','Yearly Analysis'],['compare','Compare Years'],['snapshot','Rainfall Snapshot'],['insights','Insights'],['story','Rainfall Story']];
 
 const pages = PUBLIC_VIEW ? publicPages : privatePages;
 const publicPrimaryPages = publicPages.slice(0,2);
@@ -1375,6 +1376,91 @@ function drawCompare(){
   `;
 }
 function importer(){return `<div class="two"><div class="panel"><h2>Import rainfall data</h2><p class="sub">CSV headings: <code>date,rainfall_mm,notes</code></p><p class="sub">Duplicates, invalid dates, negative values, and invalid rainfall values are rejected.</p><div class="actions"><button class="primary" id="choose-file">Choose CSV file</button><button class="secondary" id="load-included">Load included rainfall history</button></div><div id="import-message" style="margin-top:14px"></div></div><div class="panel"><h2>Export data</h2><p class="sub">Download all stored rainfall records in a compatible CSV format.</p><button class="secondary" id="export-all">Export all records</button></div></div>`}
+function story(){
+  const rows=read();
+  if(!rows.length)return empty();
+
+  const today=new Date();
+  const year=String(today.getFullYear());
+  const cutoff=`${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const ytdRows=rows.filter(r=>r.date.startsWith(`${year}-`)&&r.date.slice(5,10)<=cutoff);
+  const ytd=sum(ytdRows);
+  const monthlyTotals=byMonth(rows,year).map(monthRows=>sum(monthRows.filter(r=>r.date.slice(5,10)<=cutoff)));
+  const wettestMonth=Math.max(...monthlyTotals);
+  const wettestMonthName=wettestMonth?monthName(monthlyTotals.indexOf(wettestMonth)):'No recorded month';
+  const wettestDay=ytdRows.reduce((best,row)=>!best||Number(row.rainfall_mm)>Number(best.rainfall_mm)?row:best,null);
+  const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort();
+  const benchmarkYears=years.filter(value=>value!=='2010'&&value!==year);
+  const benchmarkValues=benchmarkYears.map(value=>sum(rows.filter(r=>r.date.startsWith(`${value}-`)&&r.date.slice(5,10)<=cutoff)));
+  const historicalAverage=benchmarkValues.length?sum(benchmarkValues)/benchmarkValues.length:0;
+  const difference=ytd-historicalAverage;
+  const percentage=historicalAverage?(difference/historicalAverage)*100:null;
+  const direction=difference<0?'below':difference>0?'above':'in line with';
+  const asAt=today.toLocaleDateString(undefined,{day:'numeric',month:'long'});
+  const steps=[
+    {eyebrow:`${year} TO DATE`,title:'The story so far',value:money(ytd),text:`Rainfall recorded through ${asAt}.`},
+    {eyebrow:'WETTEST MONTH',title:wettestMonthName,value:wettestMonth?money(wettestMonth):'—',text:wettestMonth?'The strongest monthly total so far.':'No monthly rainfall has been recorded yet.'},
+    {eyebrow:'HEAVIEST DAY',title:wettestDay?wettestDay.date:'No record yet',value:wettestDay?money(wettestDay.rainfall_mm):'—',text:wettestDay?'The largest single daily reading of the year.':'Add rainfall records to reveal this moment.'},
+    {eyebrow:'LONG-TERM CONTEXT',title:'Compared with history',value:historicalAverage?money(historicalAverage):'—',text:historicalAverage?`${money(Math.abs(difference))} ${direction} the historical average to the same date.`:'No historical benchmark is available yet.'},
+    {eyebrow:'THE TAKEAWAY',title:percentage===null?'Your rainfall story is growing':`${Math.abs(percentage).toFixed(1)}% ${direction} average`,value:money(ytd),text:percentage===null?'Keep recording to build a meaningful long-term comparison.':`${year} has recorded ${money(ytd)} so far—one chapter in your home rainfall history.`}
+  ];
+
+  return `<div class="panel rainfall-story" id="rainfall-story" data-steps='${esc(JSON.stringify(steps))}'>
+    <div class="toolbar">
+      <div><h2>Rainfall story</h2><p class="sub">A 10-second summary of your ${year} rainfall record.</p></div>
+      <button class="primary" id="play-story" type="button">Play rainfall story</button>
+    </div>
+    <div class="story-stage" aria-live="polite">
+      <p class="story-eyebrow">READY WHEN YOU ARE</p>
+      <h3>Your ${year} rainfall story</h3>
+      <div class="story-value">${money(ytd)}</div>
+      <p class="story-text">Press play to follow the year’s rainfall in five short moments.</p>
+    </div>
+    <div class="story-progress" aria-label="Rainfall story progress"><div id="story-progress-fill"></div></div>
+    <div class="story-footer"><span id="story-step-label">5 moments · 10 seconds</span><button class="link-btn" id="replay-story" type="button" disabled>Replay</button></div>
+  </div>`;
+}
+function stopRainfallStory(){
+  if(rainfallStoryTimer){
+    clearInterval(rainfallStoryTimer);
+    rainfallStoryTimer=null;
+  }
+}
+function showRainfallStoryStep(root,steps,index){
+  const stage=root.querySelector('.story-stage');
+  const progress=root.querySelector('#story-progress-fill');
+  const label=root.querySelector('#story-step-label');
+  const step=steps[index];
+  stage.classList.remove('story-enter');
+  stage.innerHTML=`<p class="story-eyebrow">${esc(step.eyebrow)}</p><h3>${esc(step.title)}</h3><div class="story-value">${esc(step.value)}</div><p class="story-text">${esc(step.text)}</p>`;
+  requestAnimationFrame(()=>stage.classList.add('story-enter'));
+  progress.style.width=`${((index+1)/steps.length)*100}%`;
+  label.textContent=`Moment ${index+1} of ${steps.length}`;
+}
+function playRainfallStory(){
+  const root=$('#rainfall-story');
+  if(!root)return;
+  const steps=JSON.parse(root.dataset.steps);
+  const playButton=$('#play-story');
+  const replayButton=$('#replay-story');
+  let index=0;
+  stopRainfallStory();
+  playButton.disabled=true;
+  replayButton.disabled=true;
+  showRainfallStoryStep(root,steps,index);
+  rainfallStoryTimer=setInterval(()=>{
+    if(!document.body.contains(root)){stopRainfallStory();return;}
+    index+=1;
+    if(index>=steps.length){
+      stopRainfallStory();
+      playButton.disabled=false;
+      replayButton.disabled=false;
+      replayButton.focus();
+      return;
+    }
+    showRainfallStoryStep(root,steps,index);
+  },2000);
+}
 function insights(){
   const rows=read();
   const intensityRows=intensityYear==='all'
@@ -1882,6 +1968,11 @@ function bind(){
   };
 }
 
+  if(page==='story'){
+    $('#play-story').onclick=playRainfallStory;
+    $('#replay-story').onclick=playRainfallStory;
+  }
+
   if(page==='compare'){
     $('#year-a').onchange=drawCompare;
     $('#year-b').onchange=drawCompare;
@@ -1916,7 +2007,7 @@ function bind(){
   }
 }
 function message(t,bad=false){const old=$('#record-form')?.previousElementSibling;if(old?.classList.contains('notice')||old?.classList.contains('error'))old.remove();$('#record-form')?.insertAdjacentHTML('beforebegin',`<div class="${bad?'error':'notice'}">${t}</div>`)}
-function render(){const views={dashboard,record,history,monthly,matrix,yearly,compare,snapshot,insights,import:importer,settings};if(!pages.some(([id])=>id===page))page='dashboard';$('#content').innerHTML=views[page]();bind()}
+function render(){stopRainfallStory();const views={dashboard,record,history,monthly,matrix,yearly,compare,snapshot,insights,story,import:importer,settings};if(!pages.some(([id])=>id===page))page='dashboard';$('#content').innerHTML=views[page]();bind()}
 function parseCsvLine(line){const fields=[];let value='',quoted=false;for(let i=0;i<line.length;i++){const character=line[i];if(character==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++}else quoted=!quoted}else if(character===','&&!quoted){fields.push(value);value=''}else value+=character}if(quoted)return {error:'unclosed quoted field'};fields.push(value);return {fields}}
 function parseImport(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter((line,index)=>index===0||line.trim()!==''), rejected=[], parsed=[], existing=new Set(read().map(record=>record.date));const header=parseCsvLine(lines.shift()||'');if(header.error||header.fields.map(value=>value.trim().toLowerCase()).join(',')!=='date,rainfall_mm,notes')return {parsed,rejected:['Header must be exactly: date,rainfall_mm,notes']};for(let index=0;index<lines.length;index++){const row=parseCsvLine(lines[index]), rowNumber=index+2;if(row.error){rejected.push(`Row ${rowNumber}: ${row.error}`);continue}let fields=row.fields;if(fields.length===4&&fields[3]===''&&/^\d+$/.test(fields[1].trim())&&/^\d+$/.test(fields[2].trim()))fields=[fields[0],fields[1]+'.'+fields[2],''];const [date,rawRainfall,notes,...extra]=fields;if(extra.length||fields.length!==3){rejected.push(`Row ${rowNumber}: expected date,rainfall_mm,notes (or date,whole,decimal,)`);continue}if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){rejected.push(`Row ${rowNumber}: date must use YYYY-MM-DD`);continue}const dateValue=new Date(`${date}T00:00:00Z`);if(Number.isNaN(dateValue.getTime())||dateValue.toISOString().slice(0,10)!==date){rejected.push(`Row ${rowNumber}: invalid calendar date`);continue}const rainfall=Number(rawRainfall);if(rawRainfall.trim()===''||!Number.isFinite(rainfall)){rejected.push(`Row ${rowNumber}: rainfall_mm must be a number`);continue}if(rainfall<0){rejected.push(`Row ${rowNumber}: rainfall_mm cannot be negative`);continue}if(existing.has(date)){rejected.push(`Row ${rowNumber}: a record already exists for ${date}`);continue}parsed.push({date,rainfall_mm:rainfall,notes:notes||''});existing.add(date)}return {parsed,rejected}}
 async function completeImport(text){
