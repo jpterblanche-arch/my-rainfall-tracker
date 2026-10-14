@@ -1492,6 +1492,13 @@ function insights(){
   const rainyDaysForIntensity=intensityRows.filter(
     r=>Number(r.rainfall_mm)>0
   ).length;
+  const asAtDate=today.toLocaleDateString(undefined,{day:'numeric',month:'long'});
+  const comparisonTone=percentage=>percentage===null?'#526071':percentage<0?'#9a6700':percentage>0?'#176c3e':'#526071';
+  const comparisonSummary=(difference,percentage)=>{
+    if(percentage===null)return 'No comparable data';
+    const direction=difference<0?'below':difference>0?'above':'at';
+    return `${money(Math.abs(difference))} ${direction} · ${Math.abs(percentage).toFixed(1)}%`;
+  };
 
   return `
     <div class="grid insights-grid">
@@ -1499,47 +1506,33 @@ function insights(){
       <div class="panel" style="grid-column:1 / -1;">
         <h2>${currentYear} rainfall performance</h2>
         <p class="sub">${benchmarkNote(historicalYears, currentYear, 'because the year is still in progress', years.includes('2010'))}</p>
-<div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
-  LONG-TERM COMPARISON
-</div>
-
-        <div class="list">
-          <div class="list-row">
-            <span><b>${currentYear} to date</b></span>
-            <b>${money(currentYTD)}</b>
-          </div>
-
-          <div class="list-row">
-            <span>Historical average to same date</span>
-            <b>${money(historicalAverageYTD)}</b>
-          </div>
-
-          <div class="list-row">
-            <span>Difference</span>
-            <b>${money(ytdDifference)} (${ytdPercentage.toFixed(1)}%)</b>
-          </div>
+        <div style="margin:18px 0 16px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#6c778b;">${currentYear} YTD · AS AT ${asAtDate.toUpperCase()}</div>
+          <div style="margin-top:4px;font-size:32px;font-weight:700;">${money(currentYTD)}</div>
         </div>
 
-      <div style="border-top:1px solid #dfe5ec;margin:14px 0;"></div>
-
-<div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">
-  PREVIOUS YEAR COMPARISON
-</div>
-
+        <div style="font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">COMPARED WITH BENCHMARKS</div>
         <div class="list">
           <div class="list-row">
-            <span><b>${currentYear} to date</b></span>
-            <b>${money(currentYTD)}</b>
+            <div>
+              <b>Historical average to same date</b>
+              <div class="sub">Long-term benchmark</div>
+            </div>
+            <div style="text-align:right;">
+              <b>${money(historicalAverageYTD)}</b>
+              <div class="sub" style="color:${comparisonTone(ytdPercentage)};">${comparisonSummary(ytdDifference,ytdPercentage)}</div>
+            </div>
           </div>
 
           <div class="list-row">
-            <span>${previousYear} to same date</span>
-            <b>${money(previousYearYTD)}</b>
-          </div>
-
-          <div class="list-row">
-            <span>Difference</span>
-            <b>${money(previousYearDifference)} (${previousYearPercentage===null?'—':previousYearPercentage.toFixed(1)+'%'})</b>
+            <div>
+              <b>${previousYear} to same date</b>
+              <div class="sub">Previous-year benchmark</div>
+            </div>
+            <div style="text-align:right;">
+              <b>${money(previousYearYTD)}</b>
+              <div class="sub" style="color:${comparisonTone(previousYearPercentage)};">${comparisonSummary(previousYearDifference,previousYearPercentage)}</div>
+            </div>
           </div>
         </div>
       </div>
